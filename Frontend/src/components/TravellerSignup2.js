@@ -1,10 +1,13 @@
 import React, {Component} from 'react';
-
-import axios from 'axios';
+import SweetAlert from 'react-bootstrap-sweetalert';
 import './OwnerLogin.css';
 import './bootstrap-social.css';
 import {Navbar} from "react-bootstrap";
 import validator from 'validator';
+
+
+import { Mutation } from 'react-apollo'
+import { travellersignupmutation } from '../mutations/signupLoginProfilemutations';
 
 //Define a Signup2 Component
 class TravellerSignup2 extends Component{
@@ -25,7 +28,6 @@ class TravellerSignup2 extends Component{
         //Bind the handlers to this class
         this.changeHandler = this.changeHandler.bind(this);
         this.handleValidation = this.handleValidation.bind(this);
-        this.submitLogin = this.submitLogin.bind(this);
     }
     
     //firstname ,lastname, email and password change handler to update state variable with the text entered by the user
@@ -115,46 +117,31 @@ class TravellerSignup2 extends Component{
         return formIsValid;
    }
 
-    //submit Login handler to send a request to the node backend
-    submitLogin(event) {
-        console.log("Inside traveller submit login");
-        //prevent page from refresh
-        event.preventDefault();
-        if(this.handleValidation()){
-            const data = {
-                firstname : this.state.firstname,
-                lastname : this.state.lastname,
-                email : this.state.email,
-                password : this.state.password
+   submitSignup = async (data) => {
+        if (this.handleValidation ()) {
+            const { cookie1, cookie2, cookie3, status, message } = data.travellersignup
+            sessionStorage.clear();
+            sessionStorage.setItem('cookie1', cookie1);
+            sessionStorage.setItem('cookie2', cookie2);
+            sessionStorage.setItem('cookie3', cookie3);
+            if(status === 200){
+                const getAlert = () => (
+                    <SweetAlert 
+                        success 
+                        title = "Success!!"
+                        onConfirm={() => window.location = "/owner/propertypost"}
+                    >
+                        Owner profile created!
+                    </SweetAlert>
+                );
+                    
+                this.setState({
+                    alert: getAlert(),
+                });
             }
-            
-            //set the with credentials to true
-            axios.defaults.withCredentials = true;
-            //make a post request with the user data
-            axios.post('http://localhost:3001/homeaway/traveller/signup',data)
-                .then(response => {
-                    console.log("Status Code : ", response.status);
-                    if(response.status === 200){
-                        const getAlert = () => (
-                            <SweetAlert 
-                            success 
-                            title = "Success!!"
-                            onConfirm={() => window.location = "/"}>
-                            Traveller profile created!
-                            </SweetAlert>
-                        );
-    
-                        this.setState({
-                            message: "",
-                            alert: getAlert(),
-                        });
-                    }
-                })
-                .catch(err => {
-                    console.log("Error is", error);
-                    this.setState({
-                        message: JSON.parse(error.response.request.response).responseMessage,
-                    });
+            this.setState({
+                submitted: true,
+                message:  message
             });
         }
     }
@@ -173,36 +160,41 @@ class TravellerSignup2 extends Component{
                         <Navbar.Brand>
                             <a href="/" title = "HomeAway" className = "logo"><img src={require('./homeaway_logo.png')} alt="Homeaway Logo"/></a>
                         </Navbar.Brand> 
+                        <div className="col-sm-12 col-sm-offset-12" style={{left: "595px", fontSize: "15px"}}>
+                        {message &&
+                            <div className={`alert alert-danger`}>{message}</div>
+                        }
+                        </div>
                     </Navbar.Header>
                     <img src={require('./logo.png')} alt="Homeaway Logo"/>
                 </Navbar>  
-                <div class="container">
+                <div className="container">
                 <p></p>
                 </div>
-                <div class="container">
+                <div className="container">
                 <p></p>
                 </div>
-                <div class="container">
+                <div className="container">
                 <p></p>
                 </div>
-                <div class="container">
+                <div className="container">
                 <p></p>
                 </div>
-                <div class="container">
+                <div className="container">
                 <p></p>
                 </div>
-                <div class="container">
+                <div className="container">
                 <p></p>
                 </div>
-                <div class="center">
+                <div className="center">
                     <div id="yourdiv">
-                        <h1 class="display-5">Sign Up for HomeAway<br></br></h1>
-                        <h2><small>	Already have an account? <a class="bg-default" href="/traveller/login">Log in</a></small></h2>
+                        <h1 className="display-5">Sign Up for HomeAway<br></br></h1>
+                        <h2><small>	Already have an account? <a className="bg-default" href="/traveller/login">Log in</a></small></h2>
                     </div>
                 </div>
-                <div class="container">
-                <div class="col-sm-6" style={{width: "35%", left: "350px"}}>
-                        <div class="login-form">
+                <div className="container">
+                <div className="col-sm-6" style={{width: "35%", left: "350px"}}>
+                        <div className="login-form">
                             <br></br>
                             <div className="row">
                                 <div className="col-md-6">
@@ -228,21 +220,29 @@ class TravellerSignup2 extends Component{
                                 <div className="help-block">{password.message}</div>
                             </div>
                             <div>
-                                <button onClick = {this.submitLogin} className="btn btn-warning" style={{width:"100%"}}>Sign me Up</button>
+                                <Mutation
+                                    mutation={travellersignupmutation}
+                                    variables= {{ firstname: firstname.value, lastname: lastname.value, email: email.value, password: password.value}}
+                                    onCompleted={data => this.submitSignup(data)}
+                                >
+                                    {mutation => (
+                                        <button onClick = {mutation} className="btn btn-warning" style={{width:"100%"}}>Sign me Up</button>
+                                    )}
+                                </Mutation>
                                 {this.state.alert}
                             </div>
                         </div>
-                        <div class="mydiv"><span class="myspan">or</span></div>
+                        <div className="mydiv"><span className="myspan">or</span></div>
                         <br></br>
                         <div>
-                            <button class="mybtn facebook_button">Log in with Facebook</button>
+                            <button className="mybtn facebook_button">Log in with Facebook</button>
                         </div>
                         <br></br>
                         <div>
                             <button className="mybtn google_button" >Log in with Google</button>
                         </div>
                         <br></br>
-                        <div class="center" id= "yourdiv">
+                        <div className="center" id= "yourdiv">
                             <font size="1">We don't post anything without your permission.
                             <br></br>
                             By creating an account you are accepting our Terms and Conditions and Privacy Policy.
@@ -253,7 +253,7 @@ class TravellerSignup2 extends Component{
                         </div>
                 </div>
                 <br></br>
-                <div class="center" id= "yourdiv">
+                <div className="center" id= "yourdiv">
                 <font size="1">Use of this Web site constitutes acceptance of the HomeAway.com Terms and Conditions and Privacy Policy.
                 <br></br>
                 ©2018 HomeAway. All rights reserved.</font>

@@ -207,40 +207,45 @@ class PropertyDetails extends Component {
             <Helmet>
               <style>{'body { background-color: white; }'}</style>
             </Helmet>
-                <Navbar>
+            <Navbar>
                 <Navbar.Header>
                     <Navbar.Brand>
                     <a href="/" title = "HomeAway" className = "logo"><img src={require('./homeaway_logo.png')} alt="Homeaway Logo"/></a>
                     </Navbar.Brand>
                 </Navbar.Header>
-                <div>
-                    <img alt="US Flag" src={require('./us_flag.png')}/>
-                    <button id="blue" className="btn" style = {{fontColor : "black", backgroundColor:"white", background:"white", borderColor:"white"}} type="button"><a href="#">Trip Boards</a></button>
+                <div className="box">
+                    <div>
+                        <img style={{marginTop: "13px"}} alt="US Flag" src={require('./us_flag.png')}/>
+                    </div>
+                    <button id="blue" className="btn" style = {{fontColor : "black", backgroundColor:"white", background:"white", borderColor:"white"}} type="button"><a>Trip Boards</a></button>
                     {!this.state.isTravelerLoggedIn 
                     ?
                     (
-                        <div className="btn btn-group">
-                            <button id="blue" className="dropdown-toggle"  style = {{backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><a href="#">Login</a></button>
-                            <div className="dropdown-menu">
-                                <a className="dropdown-item" href="/traveller/login">Traveller Login</a>
-                                <a className="dropdown-item" href="/owner/login">Owner Login</a>
-                            </div>
+                    <div className="btn btn-group" id="white">
+                        <button id="blue" className="dropdown-toggle"  style = {{backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><a>Login</a></button>
+                        <div className="dropdown-menu">
+                            <a className="dropdown-item" href="/traveller/login">Traveller Login</a>
+                            <a className="dropdown-item" href="/owner/login">Owner Login</a>
                         </div>
+                    </div>
                     )
                     :
                     (
-                        <div className="btn btn-group">
-                            <button id="blue" className="dropdown-toggle"  style = {{backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {cookie.load('cookie3')}</button>
+                    <div>
+                        <div className="btn btn-group" id="white" style = {{marginRight: "160px", width: "50px", }}>
+                            <button className="dropdown-toggle" style = {{color: "#0067db", backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {cookie.load('cookie3')}</button>
                             <div className="dropdown-menu">
-                                <a className="dropdown-item" href="/Profile">Profile</a>
-                                <a className="dropdown-item" href="/traveller/mytrips">My Trips</a>
-                                <a className="dropdown-item" href="#" onClick= {this.logout}>Logout</a>
+                            <a className="dropdown-item" href="/traveller/mytrips"> <i className="fas fa-briefcase"></i> My Trips</a>
+                            <a className="dropdown-item" href="/Profile"> <i className="fas fa-user"></i> My Profile</a>
+                            <a className="dropdown-item"  onClick= {this.logout}> <i className="fas fa-sign-out-alt"></i> Logout</a>
                             </div>
                         </div>
+                        <img style = {{marginRight: "20px", }} alt="US Flag" src={require('./mailbox.png')}/>
+                    </div>
                     )
                     }
-                    <button className="btn btn-group" style = {{color: "#fff", fontFamily: "Lato,Arial,Helvetica Neue,sans-serif", height: "40px", backgroundColor:"#fff", width: "200px", borderRadius: 25, borderColor: "#ffffff"}} data-effect="ripple" type="button" tabIndex="5" data-loading-animation="true">
-                    <a href="/owner/login">List your Property</a>
+                    <button className="btn" style = {{color: "#fff", fontSize: "15px", margin: "0 15px", padding: "12px 40px",fontFamily: "Lato,Arial,Helvetica Neue,sans-serif", height: "40px", backgroundColor:"#fff", width: "200px", borderRadius: "40px", borderColor: "#d3d8de"}} data-effect="ripple" type="button" tabIndex="5" data-loading-animation="true">
+                        <a href="/owner/login">List your Property</a>
                     </button>
                     <img src={require('./logo.png')} alt="Homeaway Logo"/>
                 </div>
@@ -248,33 +253,32 @@ class PropertyDetails extends Component {
               <div className="row">
                   <div className="col-md-4 col-md-offset-3">
                       <div className="form-group">
-                      <input type="text" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" name="search" id="search" placeholder="Where do you want to go?" defaultValue = {this.state.location} readOnly/>
-                        <span className="glyphicon glyphicon-search form-control-feedback"></span>
+                        <div className="input-group">
+                            <span className="input-group-prepend">
+                                <div className="input-group-text form-control" ><i className="fa fa-map-marker"></i></div>
+                            </span>
+                            <input type="text" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" name="search" id="search" defaultValue = {this.state.location} readOnly/>
+                        </div>
                       </div>
                   </div>
                   <div className="col-md-offset-3">
                       <div className="form-group card" style = {{ height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}}>
-                      <input
-                            type = "date"
-                            style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control"
-                            value={this.state.fromdate}
-                            readOnly
-                      />
+                        <input placeholder="Arrive" type = "date" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" value={this.state.fromdate} readOnly />
                       </div>
                   </div>
                   <div className="col-md-offset-3" style = {{marginLeft: "13px"}}>
                       <div className="form-group card" style = {{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}}> 
-                      <input
-                          style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control"
-                          type = "date"
-                          readOnly
-                          value={this.state.todate} />
+                        <input placeholder="Depart" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" type = "date" readOnly value={this.state.todate} />
                       </div>
                   </div>
                   <div className="col-md-offset-3" style = {{marginLeft: "13px"}}>
                       <div className="form-group">
-                      <input type="text" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" value= {this.state.noOfGuests} readOnly/>
-                        <span className="glyphicon glyphicon-search form-control-feedback"></span>
+                        <div className="input-group">
+                            <span className="input-group-prepend">
+                                <div className="input-group-text form-control" ><i className="fa fa-user-friends"></i></div>
+                            </span>
+                            <input type="text" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" value= {this.state.noOfGuests} readOnly/>
+                        </div>
                       </div> 
                   </div>
                   </div>

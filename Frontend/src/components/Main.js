@@ -1,19 +1,19 @@
-import React from 'react';
+import React, {Component} from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import Home from './components/Home';
-import PropertySearchResults from './components/PropertySearchResults';
-import PropertyDetails from './components/PropertyDetails';
-import TravellerLogin from './components/TravellerLogin';
-import TravellerTripListings from './components/TravellerTripListings';
-import OwnerLogin from './components/OwnerLogin';
-import OwnerPropertyPost from './components/OwnerPropertyPost';
-import OwnerPropertyListings from './components/OwnerPropertyListings';
-import TravellerSignup1 from './components/TravellerSignup1';
-import TravellerSignup2 from './components/TravellerSignup2';
-import OwnerSignup1 from './components/OwnerSignup1';
-import OwnerSignup2 from './components/OwnerSignup2';
-import Profile from './components/Profile';
+import Home from './Home';
+import PropertySearchResults from './PropertySearchResults';
+import PropertyDetails from './PropertyDetails';
+import TravellerLogin from './TravellerLogin';
+import TravellerTripListings from './TravellerTripListings';
+import OwnerLogin from './OwnerLogin';
+import OwnerPropertyPost from './OwnerPropertyPost';
+import OwnerPropertyListings from './OwnerPropertyListings';
+import TravellerSignup1 from './TravellerSignup1';
+import TravellerSignup2 from './TravellerSignup2';
+import OwnerSignup1 from './OwnerSignup1';
+import OwnerSignup2 from './OwnerSignup2';
+import Profile from './Profile';
 
 class Main extends Component {
     render(){

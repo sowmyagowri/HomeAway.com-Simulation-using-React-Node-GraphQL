@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import 'typeface-roboto'
 import './OwnerPropertyListings.css';
+import './TravellerTripListings.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import {Redirect} from 'react-router';
@@ -56,7 +57,7 @@ class TravellerTripListings extends Component {
             return Object.keys(allTrips).map((i) => {
                     return <div className="brdr bgc-fff pad-10 box-shad btm-mrg-20 myborder1 property-listing" key={allTrips[i].ID}>
                     <div className="media">
-                        <a className="pull-left" href="#" target="_parent">
+                        <a className="pull-left" href="" target="_parent">
                         <img alt="Thumbnail View of Property" className="img-responsive" src={`http://localhost:3001/uploads/${allTrips[0].image1}`} /></a>
                         <div className="media-body">  
                             <h4 className="myh4">{allTrips[i].headline}</h4>
@@ -104,35 +105,44 @@ class TravellerTripListings extends Component {
   return(
     <div>
       {redirectVar}
-      <Navbar inverse collapseOnSelect>
-          <Navbar.Header>
-            <Navbar.Brand>
-            <a href="/" title = "HomeAway" className = "logo"><img alt="Homeaway Logo" src={require('./homeaway_logo.png')}/></a>
-            </Navbar.Brand>
-          </Navbar.Header>
-        <div>
-           <div className="btn btn-group">
-             <button className="dropdown-toggle"  style = {{backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {cookie.load('cookie3')}</button>
-             <div className="dropdown-menu">
-                <a className="dropdown-item" href="/Profile">Profile</a>
-                <a className="dropdown-item" href="/">Book My Trip</a>
-                <a className="dropdown-item" onClick = {this.logout}>Logout</a>
-             </div>
-           </div>
-           <img src={require('./logo.png')} alt="Homeaway Logo"/>
-        </div>
-      </Navbar>
-            <div className = "container-full">
-                <div className="container-pad">
-                    <div className="form-row myformrow">
-                        <div className="form-group col-sm-9" id = "property-listings" style ={{maxWidth : "900px"}}>
-                            { this.renderTrips() }
-                        </div>
+        <Navbar inverse collapseOnSelect>
+            <Navbar.Header>
+                <Navbar.Brand>
+                    <a href="/" title = "HomeAway" className = "logo"><img alt="Homeaway Logo" src={require('./homeaway_logo.png')}/></a>
+                </Navbar.Brand>
+            </Navbar.Header>
+            <div>
+                <div className="btn btn-group" id="white">
+                    <button className="dropdown-toggle" style = {{fontSize: "18px", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {cookie.load('cookie3')}</button>
+                    <div className="dropdown-menu">
+                        <a className="dropdown-item" href="/traveller/mytrips"> <i className="fas fa-briefcase"></i> My Trips</a>
+                        <a className="dropdown-item" href="/Profile"> <i className="fas fa-user"></i> My Profile</a>
+                        <a className="dropdown-item"  onClick= {this.logout}> <i className="fas fa-sign-out-alt"></i> Logout</a>
                     </div>
                 </div>
-          </div>
+                <img style={{marginLeft: "50px"}} src={require('./logo.png')} alt="Homeaway Logo"/>
+            </div>
+        </Navbar>
+        <div style={{backgroundColor: "white", borderLeftColor:"white",borderRightColor:"white",borderBottomColor: "#d6d7da", borderTopColor: "#d6d7da", borderStyle: "solid"}}>
+            <div id="conttab" className="container">
+                <ul id="ulinktab">
+                    <li id="ulinktab" className="one"><a id="linktab" href="/traveller/mytrips"> <i className="fas fa-briefcase"></i> My Trips</a></li>
+                    <li id="ulinktab" className="two"><a id="linktab" href="/Profile"> <i className="fas fa-user"></i> My Profile</a></li>
+                    <hr id="hrtab3" />
+                </ul>
+            </div>
         </div>
-        )
-    }
+        <div className = "container-full">
+            <div className="container-pad">
+                <div className="form-row myformrow">
+                    <div className="form-group col-sm-9" id = "property-listings" style ={{maxWidth : "900px"}}>
+                        { this.renderTrips() }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    )
+  }
 }
 export default TravellerTripListings;

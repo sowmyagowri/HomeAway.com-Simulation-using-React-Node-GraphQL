@@ -3,13 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "apollo-boost": "^0.1.22",
     "axios": "^0.18.0",
     "bootstrap": "^3.3.7",
     "font-awesome": "^4.7.0",
+    "graphql": "^14.0.2",
     "material-ui": "^0.20.2",
     "moment": "^2.22.2",
     "npm": "^6.4.1",
     "react": "^16.5.0",
+    "react-apollo": "^2.3.2",
     "react-bootstrap": "^0.32.4",
     "react-bootstrap-dropdown-menu": "^1.1.15",
     "react-bootstrap-sweetalert": "^4.4.1",
@@ -26,7 +29,8 @@
     "react-simple-dropdown": "^3.2.3",
     "react-tabs": "^2.3.0",
     "react-web-tabs": "^1.0.1",
-    "typeface-roboto": "0.0.54"
+    "typeface-roboto": "0.0.54",
+    "validator": "^10.9.0"
   },
   "scripts": {
     "start": "react-scripts start",

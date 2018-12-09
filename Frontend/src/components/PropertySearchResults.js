@@ -76,7 +76,7 @@ class PropertySearchResults extends Component {
             return Object.keys(searchData).map((i) => {
                     return <div className="brdr bgc-white pad-10 box-shad btm-mrg-20 property-listing" key={searchData[i].ID}>
                     <div className="media">
-                        <a className="pull-left" href="#" target="_parent">
+                        <a className="pull-left" href="" target="_parent">
                         <img alt="Thumbnail View of Property" className="img-responsive" src={`http://localhost:3001/uploads/${searchData[i].image1}`} /></a>
                         <div className="clearfix visible-sm"> </div>
                         <div className="media-body fnt-smaller">
@@ -141,15 +141,16 @@ class PropertySearchResults extends Component {
             console.log("Search Location cannot be empty");
         }
     
+        
+        var CurrentDate = new Date();
+        CurrentDate.setHours(0,0,0,0);
         //From Date
         if(!this.state.fromdate){
           formIsValid = false;
           alert("From Date is a Required field");
           console.log("From Date cannot be empty");
         } else {
-          var CurrentDate = new Date();
-          CurrentDate.setHours(0,0,0,0);
-          var GivenfromDate = new Date(this.state.fromdate.replace(/-/g, '\/'));
+          var GivenfromDate = new Date(this.state.fromdate.replace(/-/g));
           if(GivenfromDate < CurrentDate){
             alert('From date should be greater than the current date.');
             formIsValid = false;
@@ -162,9 +163,7 @@ class PropertySearchResults extends Component {
             alert("To Date is a Required field");
             console.log("To Date cannot be empty");
          } else {
-          var CurrentDate = new Date();
-          CurrentDate.setHours(0,0,0,0);
-          var GiventoDate = new Date(this.state.todate.replace(/-/g, '\/'));
+          var GiventoDate = new Date(this.state.todate.replace(/-/g));
     
           if(GiventoDate < CurrentDate){
             alert('To date should be greater than the current date.');
@@ -260,76 +259,89 @@ class PropertySearchResults extends Component {
             <Helmet>
               <style>{'body { background-color: white; }'}</style>
             </Helmet>
-                <Navbar>
+            <Navbar>
                 <Navbar.Header>
                     <Navbar.Brand>
                     <a href="/" title = "HomeAway" className = "logo"><img src={require('./homeaway_logo.png')} alt="Homeaway Logo"/></a>
                     </Navbar.Brand>
                 </Navbar.Header>
-                <div>
-                    <img alt="US Flag" src={require('./us_flag.png')}/>
-                    <button id="blue" className="btn" style = {{fontColor : "black", backgroundColor:"white", background:"white", borderColor:"white"}} type="button"><a href="#">Trip Boards</a></button>
+                <div className="box">
+                    <div>
+                        <img style={{marginTop: "13px"}} alt="US Flag" src={require('./us_flag.png')}/>
+                    </div>
+                    <button id="blue" className="btn" style = {{fontColor : "black", backgroundColor:"white", background:"white", borderColor:"white"}} type="button"><a >Trip Boards</a></button>
                     {!this.state.isTravelerLoggedIn 
                     ?
                     (
-                        <div className="btn btn-group">
-                        <button id="blue" className="dropdown-toggle"  style = {{backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><a href="#">Login</a></button>
+                    <div className="btn btn-group" id="white">
+                        <button id="blue" className="dropdown-toggle"  style = {{backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><a >Login</a></button>
                         <div className="dropdown-menu">
                             <a className="dropdown-item" href="/traveller/login">Traveller Login</a>
                             <a className="dropdown-item" href="/owner/login">Owner Login</a>
                         </div>
+                    </div>
+                    )
+                    :
+                    (
+                    <div>
+                        <div className="btn btn-group" id="white" style = {{marginRight: "160px", width: "50px", }}>
+                            <button className="dropdown-toggle" style = {{color: "#0067db", backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {cookie.load('cookie3')}</button>
+                            <div className="dropdown-menu">
+                            <a className="dropdown-item" href="/traveller/mytrips"> <i className="fas fa-briefcase"></i> My Trips</a>
+                            <a className="dropdown-item" href="/Profile"> <i className="fas fa-user"></i> My Profile</a>
+                            <a className="dropdown-item"  onClick= {this.logout}> <i className="fas fa-sign-out-alt"></i> Logout</a>
+                            </div>
                         </div>
-                        )
-                        :
-                        (
-                        <div className="btn btn-group">
-                        <button id="blue" className="dropdown-toggle"  style = {{backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {cookie.load('cookie3')}</button>
-                        <div className="dropdown-menu">
-                            <a className="dropdown-item" href="/Profile">Profile</a>
-                            <a className="dropdown-item" href="/traveller/mytrips">My Trips</a>
-                            <a className="dropdown-item" href="#" onClick= {this.logout}>Logout</a>
-                        </div>
-                        </div>
-                        )
+                        <a href="/inbox" title = "HomeAway" className = "logo"><img style = {{marginRight: "20px", }} alt="Mailbox" src={require('./mailbox.png')}/></a>
+                    </div>
+                    )
                     }
-                    <button className="btn btn-group" style = {{color: "#fff", fontFamily: "Lato,Arial,Helvetica Neue,sans-serif", height: "40px", backgroundColor:"#fff", width: "200px", borderRadius: 25, borderColor: "#ffffff"}} data-effect="ripple" type="button" tabIndex="5" data-loading-animation="true">
-                    <a href="/owner/login">List your Property</a>
+                    <button className="btn" style = {{color: "#fff", fontSize: "15px", margin: "0 15px", padding: "12px 40px",fontFamily: "Lato,Arial,Helvetica Neue,sans-serif", height: "40px", backgroundColor:"#fff", width: "200px", borderRadius: "40px", borderColor: "#d3d8de"}} data-effect="ripple" type="button" tabIndex="5" data-loading-animation="true">
+                        <a href="/owner/login">List your Property</a>
                     </button>
                     <img src={require('./logo.png')} alt="Homeaway Logo"/>
                 </div>
-            <div className="container" style = {{marginTop :"1%"}}>
-              <div className="row">
-                <div className="col-md-4 col-md-offset-3">
-                    <div className="form-group">
-                      <input type="text" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control"  defaultValue = {this.state.location} name="location" id="location" placeholder="Where do you want to go?" onChange = {this.locationChangeHandler}/>
-                        <span className="glyphicon glyphicon-search form-control-feedback"></span>
+                <div className="container" style = {{marginTop :"1%"}}>
+                    <div className="row">
+                        <div className="col-md-4 col-md-offset-3" style = {{marginLeft: "-50px"}}>
+                            <div className="form-group">
+                            <div className="input-group">
+                                <span className="input-group-prepend">
+                                    <div className="input-group-text form-control" ><i className="fa fa-map-marker"></i></div>
+                                </span>
+                                <input type="text" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control"  defaultValue = {this.state.location} name="location" id="location" placeholder="Where do you want to go?" onChange = {this.changeHandler}/>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-md-offset-3">
+                            <div className="form-group card" style = {{ height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}}>
+                            <input placeholder="Arrive" defaultValue = {this.state.fromdate} onChange = {this.changeHandler} name="fromdate" type = "date" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" value={this.state.fromdate}/>
+                            </div>
+                        </div>
+                        <div className="col-md-offset-3" style = {{marginLeft: "13px"}}>
+                            <div className="form-group card" style = {{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}}> 
+                            <input placeholder="Depart" defaultValue = {this.state.todate} onChange = {this.changeHandler} name="todate" type = "date" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" value={this.state.todate}/>
+                            </div>
+                        </div>
+                        <div className="col-md-offset-3" style = {{marginLeft: "13px", width: "18%"}}>
+                            <div className="form-group">
+                                <div className="input-group">
+                                    <span className="input-group-prepend">
+                                        <div className="input-group-text form-control" ><i className="fa fa-user-friends"></i></div>
+                                    </span>
+                                    <input type="number" min = "1" onChange = {this.changeHandler} name="noOfGuests" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" value= {this.state.noOfGuests}/>
+                                </div>
+                            </div> 
+                        </div>
+                        <div className="col-md-offset-3" style = {{marginLeft: "13px"}}>
+                        <div className="form-group">
+                            <button className="btn btn-primary" onClick = {this.searchPlace} style = {{ height: "60px", borderColor: "#ffffff", backgroundColor:"#0067db", width: "120px", borderRadius: 25}} data-effect="ripple" type="button" tabIndex="5" data-loading-animation="true">
+                                Search
+                            </button>
+                        </div>
+                        </div>
                     </div>
                 </div>
-                <div className="col-md-offset-3">
-                    <div className="form-group card" style = {{ height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}}>
-                      <input defaultValue = {this.state.fromdate} onChange = {this.fromDateChangeHandler} type = "date" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" value={this.state.fromdate}/>
-                    </div>
-                </div>
-                <div className="col-md-offset-3" style = {{marginLeft: "13px"}}>
-                    <div className="form-group card" style = {{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}}> 
-                    <input defaultValue = {this.state.todate} onChange = {this.toDateChangeHandler} type = "date" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" value={this.state.todate}/>
-                      </div>
-                </div>
-                <div className="col-md-offset-3" style = {{marginLeft: "13px"}}>
-                      <div className="form-group">
-                      <input type="text" onChange = {this.noOfGuestsChangeHandler} style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" value= {this.state.noOfGuests}/>
-                        <span className="glyphicon glyphicon-search form-control-feedback"></span>
-                      </div> 
-                </div>
-                <div className="col-md-offset-3" style = {{marginLeft: "13px"}}>
-                  <div className="form-group">
-                    <button className="btn btn-primary" onClick = {this.searchPlace} style = {{ height: "60px", borderColor: "#ffffff", backgroundColor:"#0067db", width: "120px", borderRadius: 25}} data-effect="ripple" type="button" tabIndex="5" data-loading-animation="true">
-                    Search
-                    </button>
-                  </div>
-                </div>
-               </div>
-            </div>
             </Navbar>
             {this.state.detailsFetched 
               ?
@@ -351,11 +363,11 @@ class PropertySearchResults extends Component {
                                         zoom: 8
                                         }}
                                         onMapLoad={map => {
-                                        var marker = new window.google.maps.Marker({
-                                            position: { lat: lattitude, lng:  longitude},
-                                            map: map,
-                                            title: locationTitle
-                                        });
+                                            new window.google.maps.Marker({
+                                                position: { lat: lattitude, lng:  longitude},
+                                                map: map,
+                                                title: locationTitle
+                                            });
                                         }}
                                     />
                                 </div>

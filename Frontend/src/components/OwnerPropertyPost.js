@@ -110,15 +110,16 @@ logout = () => {
 handleValidation(){
   let formIsValid = true;
 
+  var CurrentDate = new Date();
+  CurrentDate.setHours(0,0,0,0);
+
   //From Date
   if(!this.state.startDate){
     formIsValid = false;
     alert("From Date is a Required field");
     console.log("From Date cannot be empty");
   } else {
-    var CurrentDate = new Date();
-    CurrentDate.setHours(0,0,0,0);
-    var GivenstartDate = new Date(this.state.startDate.replace(/-/g, '\/'));
+    var GivenstartDate = new Date(this.state.startDate.replace(/-/g));
     if(GivenstartDate < CurrentDate){
       alert('From date should be greater than the current date.');
       formIsValid = false;
@@ -131,9 +132,7 @@ handleValidation(){
       alert("To Date is a Required field");
       console.log("To Date cannot be empty");
    } else {
-    var CurrentDate = new Date();
-    CurrentDate.setHours(0,0,0,0);
-    var GivenendDate = new Date(this.state.endDate.replace(/-/g, '\/'));
+    var GivenendDate = new Date(this.state.endDate.replace(/-/g));
 
     if(GivenendDate < CurrentDate){
       alert('To date should be greater than the current date.');
@@ -284,7 +283,7 @@ render(){
 
   let redirectVar = null;
   console.log(cookie.load('cookie1'))
-  if(cookie.load('cookie1') != 'ownercookie'){
+  if(cookie.load('cookie1') !== 'ownercookie'){
     redirectVar = <Redirect to = "/owner/login"/>
   }
   if(this.state.posted){
@@ -297,21 +296,32 @@ render(){
       <Navbar inverse collapseOnSelect>
           <Navbar.Header>
             <Navbar.Brand>
-              <a href="#" title = "HomeAway" className = "logo"><img alt="Homeaway Logo" src={require('./homeaway_logo.png')}/></a>
+              <a  title = "HomeAway" className = "logo"><img alt="Homeaway Logo" src={require('./homeaway_logo.png')}/></a>
             </Navbar.Brand>
           </Navbar.Header>
         <div>
-           <div className="btn btn-group">
-             <button className="dropdown-toggle"  style = {{backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {this.state.name}</button>
+           <div className="btn btn-group" id="white">
+             <button className="dropdown-toggle"  style = {{fontSize: "18px",  backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {this.state.name}</button>
              <div className="dropdown-menu">
-                <a className="dropdown-item" href="/Profile">Profile</a>
-                <a className="dropdown-item" href="/owner/mylistings">My Listings</a>
-                <a className="dropdown-item" onClick = {this.logout}>Logout</a>
+                <a className="dropdown-item" href="/owner/mylistings"> <i className="fas fa-home"></i> My Listings</a>
+                <a className="dropdown-item" href="/owner/propertypost"> <i className="fas fa-building"></i> Post Property</a>
+                <a className="dropdown-item" href="/Profile"> <i className="fas fa-user"></i> My Profile</a>
+                <a className="dropdown-item" onClick = {this.logout}> <i className="fas fa-sign-out-alt"></i> Logout</a>
              </div>
            </div>
-           <img src={require('./logo.png')} alt="Homeaway Logo"/>
+           <img style={{marginLeft: "50px"}} src={require('./logo.png')} alt="Homeaway Logo"/>
         </div>
       </Navbar>
+      <div style={{backgroundColor: "white", borderLeftColor:"white",borderRightColor:"white",borderBottomColor: "#d6d7da", borderTopColor: "#d6d7da", borderStyle: "solid"}}>
+        <div id="conttab" className="container">
+            <ul id="ulinktab">
+                <li id="ulinktab" className="one"><a id="linktab" href="/owner/mylistings"> <i className="fas fa-home"></i> My Listings</a></li>
+                <li id="ulinktab" className="two"><a id="linktab" href="/Profile"> <i className="fas fa-user"></i> My Profile</a></li>
+                <li id="ulinktab" className="three"><a id="linktab" href="/owner/propertypost"> <i className="fas fa-building"></i> Post Property</a></li>
+                <hr id="hrtab2" />
+            </ul>
+        </div>
+      </div>
        <div className="container" style = {{fontFamily: "Lato,Arial,Helvetica Neue,sans-serif", marginTop : "50px"}}>
        <div className="row">
          <div className="col-md-12">

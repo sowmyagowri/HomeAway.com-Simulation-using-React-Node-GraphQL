@@ -1,6 +1,4 @@
 import React, {Component} from 'react';
-import cookie from 'react-cookies';
-import {Redirect} from 'react-router';
 import {Navbar} from "react-bootstrap";
 import './home.css';
 import Background from './homepage_background.png'
@@ -10,7 +8,6 @@ class Home extends Component {
     super(props);
     this.state = {
       email: "",
-      isTravelerLoggedIn: false,
       backgroundImage: `url(${Background})`,
       searchLocation: "",
       fromDate: new Date(),
@@ -26,9 +23,7 @@ class Home extends Component {
   }
 
   logout = () => {
-    cookie.remove('cookie1', {path: '/'})
-    cookie.remove('cookie2', {path: '/'})
-    cookie.remove('cookie3', {path: '/'})
+    sessionStorage.clear();
     console.log("All cookies removed!")
     window.location = "/"
   }
@@ -75,15 +70,15 @@ class Home extends Component {
     }
 
     console.log(this.state.fromDate);
+    var CurrentDate = new Date();
+    CurrentDate.setHours(0,0,0,0);
     //From Date
     if(!this.state.fromDate){
       formIsValid = false;
       alert("From Date is a Required field");
       console.log("From Date cannot be empty");
     } else {
-      var CurrentDate = new Date();
-      CurrentDate.setHours(0,0,0,0);
-      var GivenfromDate = new Date(this.state.fromDate.replace(/-/g, '\/'));
+      var GivenfromDate = new Date(this.state.fromDate.replace(/-/g));
       if(GivenfromDate < CurrentDate){
         alert('From date should be greater than the current date.');
         formIsValid = false;
@@ -96,9 +91,7 @@ class Home extends Component {
         alert("To Date is a Required field");
         console.log("To Date cannot be empty");
      } else {
-      var CurrentDate = new Date();
-      CurrentDate.setHours(0,0,0,0);
-      var GiventoDate = new Date(this.state.toDate.replace(/-/g, '\/'));
+      var GiventoDate = new Date(this.state.toDate.replace(/-/g));
 
       if(GiventoDate < CurrentDate){
         alert('To date should be greater than the current date.');
@@ -137,50 +130,52 @@ class Home extends Component {
   }
 
   render(){
-    let redirectVar = null;
-    if(cookie.load('cookie1')){
-      this.state.isTravelerLoggedIn = true
-    } else {
-      redirectVar = <Redirect to = "/"/>
+    let isTravelerLoggedIn = false;
+    if(sessionStorage.getItem('cookie1')){
+        isTravelerLoggedIn = true
     }
+
     return(
       <div style={{height:"800px", backgroundImage: this.state.backgroundImage}}>
-      {redirectVar}
         <Navbar style = {{backgroundColor: "transparent", background: "transparent", borderColor: "transparent"}}>
           <Navbar.Header>
             <Navbar.Brand>
               <a href="/" title = "HomeAway" className = "logo"><img alt="Homeaway White Logo" src={require('./homeaway_white.svg')}/></a>
             </Navbar.Brand>
           </Navbar.Header>
-          <div>
-            <img alt="US Flag" src={require('./us_flag.png')}/>
-            <button className="btn" style = {{fontColor : "#0067db", backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button">Trip Boards</button>
-            {console.log(this.state.isTravelerLoggedIn )}
-            {!this.state.isTravelerLoggedIn 
+          <div className="box">
+            <div>
+              <img style={{marginTop: "13px"}} alt="US Flag" src={require('./us_flag.png')}/>
+            </div>
+            <button className="btn" id="white" style = {{fontColor : "#0067db", backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button">Trip Boards</button>
+            {!isTravelerLoggedIn 
               ?
               (
-                <div className="btn btn-group">
-                  <button id="white" className="dropdown-toggle"  style = {{backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Login</button>
+                <div className="btn btn-group" id="white" >
+                  <button className="dropdown-toggle" style = {{color: "white", backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Login</button>
                   <div className="dropdown-menu">
-                    <a className="dropdown-item" href="/traveller/login">Traveller Login</a>
+                    <a className="dropdown-item" href="/traveller/login">Traveler Login</a>
                     <a className="dropdown-item" href="/owner/login">Owner Login</a>
                   </div>
                 </div>
                 )
                 :
                 (
-                <div className="btn btn-group">
-                  <button id="white" className="dropdown-toggle"  style = {{backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {cookie.load('cookie3')}</button>
-                  <div className="dropdown-menu">
-                    <a className="dropdown-item" href="/Profile">Profile</a>
-                    <a className="dropdown-item" href="/traveller/mytrips">My Trips</a>
-                    <a className="dropdown-item" href="#" onClick= {this.logout}>Logout</a>
+                <div>
+                  <div id="white" className="btn btn-group" style = {{marginRight: "160px", width: "50px", }}>
+                    <button className="dropdown-toggle" style = {{color: "white", backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {sessionStorage.getItem('cookie3')} </button>
+                    <div className="dropdown-menu">
+                      <a className="dropdown-item" href="/traveller/mytrips"> <i className="fas fa-briefcase"></i> My Trips</a>
+                      <a className="dropdown-item" href="/Profile"> <i className="fas fa-user"></i> My Profile</a>
+                      <a className="dropdown-item"  onClick= {this.logout}> <i className="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
                   </div>
+                  <a href="" title = "HomeAway" className = "logo"><img style = {{marginRight: "20px", }} alt="Mailbox" src={require('./mailbox.png')}/></a>
                 </div>
                 )
              }
-              <button className="btn btn-group" style = {{color: "#fff", fontFamily: "Lato,Arial,Helvetica Neue,sans-serif", height: "40px", backgroundColor:"#fff", width: "200px", borderRadius: 25, borderColor: "#ffffff"}} data-effect="ripple" type="button" tabIndex="5" data-loading-animation="true">
-              <a href="/owner/login">List your Property</a>
+              <button id="blue" className="btn btn-group" style = {{color: "#fff", fontFamily: "Lato,Arial,Helvetica Neue,sans-serif", height: "40px", backgroundColor:"#fff", width: "200px", borderRadius: 25, borderColor: "#ffffff"}} data-effect="ripple" type="button" tabIndex="5" data-loading-animation="true">
+                <a id="list" href="/owner/login">List your Property</a>
               </button>
               <img src={require('./homeaway_house_white.svg')} alt="Homeaway Logo"/>
           </div>
@@ -193,20 +188,28 @@ class Home extends Component {
                   <div className="row">
                     <div className="col-md-4 col-md-offset-3">
                       <div className="form-group">
-                      	<input type="text" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" name="search" id="search" placeholder="Where do you want to go?" onChange = {this.searchLocationChangeHandler}/>
-                        <span className="glyphicon glyphicon-search form-control-feedback"></span>
+                        <div className="input-group">
+                          <span className="input-group-prepend">
+                            <div className="input-group-text form-control" ><i className="fa fa-map-marker"></i></div>
+                          </span>
+                          <input type="text" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" name="search" id="home" placeholder="Where do you want to go?" onChange = {this.searchLocationChangeHandler}/>
+                        </div>
                       </div>
                     </div>
                   <div className="col-md-offset-3">
-                    <input style ={{width: "130px", height: "60px"}} onChange = {this.fromDateChangeHandler} type="date" name="fromdate"/>  
+                    <input placeholder="Arrive" style ={{width: "183px", height: "60px"}} onChange = {this.fromDateChangeHandler} type="date" name="fromdate"/>  
                   </div>
                   <div className="col-md-offset-3" style = {{marginLeft: "13px"}}>
-                    <input style ={{width: "130px", height: "60px"}} onChange = {this.toDateChangeHandler} type="date" name="todate"/>  
+                    <input placeholder="Depart" style ={{width: "187px", height: "60px"}} onChange = {this.toDateChangeHandler} type="date" name="todate"/>  
                   </div>
-                  <div className="col-md-offset-3" style = {{marginLeft: "13px"}}>
-                    <div className="form-group">
-                      <input type="number" min = "1" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control" placeholder="No of guests?" onChange = {this.guestsChangeHandler}/>
-                      <span className="glyphicon glyphicon-search form-control-feedback"></span>
+                  <div className="form-group">
+                    <div className="col-md-offset-3" style = {{marginLeft: "13px"}}>
+                      <div className="input-group">
+                        <span className="input-group-prepend">
+                          <div className="input-group-text form-control" ><i className="fa fa-user-friends"></i></div>
+                        </span>
+                        <input id="home" type="number" min = "1" style ={{height: "60px", width: "140px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica", position: "relative"}} className="form-control" placeholder="No of guests?" onChange = {this.guestsChangeHandler}/>
+                      </div>
                     </div>
                   </div>
                   <div className="col-md-offset-3" style = {{marginLeft: "13px"}}>
