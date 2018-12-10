@@ -68,4 +68,35 @@ const ownerpropertylistingsquery = gql`
     }
 `;
 
-export { propertysearchquery, ownerpropertylistingsquery };
+const propertydetailsfetchquery = gql`
+    query PropertyDetails($propertyID: String){
+        propertydetails(propertyID: $propertyID) {
+            listedBy,
+            startDate,
+            endDate,
+            sleeps,
+            bedrooms,
+            bathrooms,
+            baseRate,
+            country,
+            city,
+            state,
+            zipcode,
+            headline,
+            description,
+            currency,
+            minStay,
+            amenities,
+            streetAddress,
+            propertyType,
+            uid,
+            image1,
+            image2,
+            image3,
+            image4,
+            image5,
+        }
+    }
+`;
+
+export { propertysearchquery, ownerpropertylistingsquery, propertydetailsfetchquery };

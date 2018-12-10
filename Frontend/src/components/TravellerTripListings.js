@@ -5,13 +5,8 @@ import './TravellerTripListings.css';
 import {Redirect} from 'react-router';
 import {Navbar} from "react-bootstrap";
 import moment from 'moment';
-import ApolloClient from 'apollo-boost';
+import { Query } from 'react-apollo'
 import { tripsfetchquery } from '../queries/tripsquery';
-
-// apollo client setup
-const client = new ApolloClient({
-  uri: 'http://localhost:3001/homeaway/graphql'
-});
 
 class TravellerTripListings extends Component {
     
@@ -33,66 +28,48 @@ class TravellerTripListings extends Component {
         console.log("All cookies removed!")
         window.location = "/"
     }
-
-    componentDidMount(){
     
-        client.query({ query: tripsfetchquery, variables: { bookedBy: sessionStorage.getItem('cookie2') }})
-            .then (data => {
-                if ( data.data.travellertripsfetch.length > 0) {
-                    this.setState({
-                        allTrips : data.data.travellertripsfetch,
-                        isLoading : false,
-                        detailsFetched: true
-                    });
-                }
-            })
-    }
-    
-    renderTrips () {
-        const {allTrips} = this.state;
-        const {isLoading} = this.state;
-        if(!isLoading){
-            return Object.keys(allTrips).map((i) => {
-                return <div className="brdr bgc-fff pad-10 box-shad btm-mrg-20 myborder1 property-listing" key={allTrips[i].ID}>
-                <div className="media">
-                    <a className="pull-left"  target="_parent">
-                    <img alt="Thumbnail View of Property" className="img-responsive" src={`http://localhost:3001/uploads/${allTrips[0].image1}`} /></a>
-                    <div className="media-body">  
-                        <h4 className="myh4" style={{paddingLeft: "10px"}}>{allTrips[i].headline}</h4>
-                        <h6 className="myh6" style={{paddingLeft: "10px"}}>{allTrips[i].description}</h6>
+    renderTrips (allTrips) {
+        return Object.keys(allTrips).map((i) => {
+            return <div className="brdr bgc-fff pad-10 box-shad btm-mrg-20 myborder1 property-listing" key={allTrips[i].ID}>
+            <div className="media">
+                <a className="pull-left"  target="_parent">
+                <img alt="Thumbnail View of Property" className="img-responsive" src={`http://localhost:3001/uploads/${allTrips[0].image1}`} /></a>
+                <div className="media-body">  
+                    <h4 className="myh4" style={{paddingLeft: "10px"}}>{allTrips[i].headline}</h4>
+                    <h6 className="myh6" style={{paddingLeft: "10px"}}>{allTrips[i].description}</h6>
 
-                        <ul className="list-inline" style={{paddingLeft: "10px"}}>
-                            <li className = "list-inline-item"><img alt="Pindrop Sign" style={{height: "35px"}} src={require('./pindrop.png')}/></li>
-                            <li className = "list-inline-item">{allTrips[i].streetAddress}</li>
-                            <li className = "list-inline-item">{allTrips[i].city}</li>
-                            <li className = "list-inline-item">{allTrips[i].state}</li>
-                            <li className = "list-inline-item">{allTrips[i].country}</li>
-                        </ul>
+                    <ul className="list-inline" style={{paddingLeft: "10px"}}>
+                        <li className = "list-inline-item"><img alt="Pindrop Sign" style={{height: "35px"}} src={require('./pindrop.png')}/></li>
+                        <li className = "list-inline-item">{allTrips[i].streetAddress}</li>
+                        <li className = "list-inline-item">{allTrips[i].city}</li>
+                        <li className = "list-inline-item">{allTrips[i].state}</li>
+                        <li className = "list-inline-item">{allTrips[i].country}</li>
+                    </ul>
 
-                        <ul className="list-inline" style={{paddingLeft: "10px"}}>
-                            <li className = "list-inline-item"><i className="fas fa-home"></i></li>
-                            <li className = "list-inline-item">{allTrips[i].propertyType}</li>
-                            <li className = "list-inline-item"><i className="fas fa-bed"></i></li>
-                            <li className = "list-inline-item"> {allTrips[i].bedrooms} BR</li>
-                            <li className = "list-inline-item"><i className="fas fa-bath"></i></li>
-                            <li className = "list-inline-item"> {allTrips[i].bathrooms} BA</li>
-                            <li className = "list-inline-item"><i className="fas fa-user"></i></li>
-                            <li className = "list-inline-item"> Sleeps {allTrips[i].sleeps}</li>
-                            <li className = "list-inline-item"><i className="fa fa-calendar"></i></li>
-                            <li className = "list-inline-item"> Min Stay {allTrips[i].minStay}</li>
-                        </ul>
+                    <ul className="list-inline" style={{paddingLeft: "10px"}}>
+                        <li className = "list-inline-item"><i className="fas fa-home"></i></li>
+                        <li className = "list-inline-item">{allTrips[i].propertyType}</li>
+                        <li className = "list-inline-item"><i className="fas fa-bed"></i></li>
+                        <li className = "list-inline-item"> {allTrips[i].bedrooms} BR</li>
+                        <li className = "list-inline-item"><i className="fas fa-bath"></i></li>
+                        <li className = "list-inline-item"> {allTrips[i].bathrooms} BA</li>
+                        <li className = "list-inline-item"><i className="fas fa-user"></i></li>
+                        <li className = "list-inline-item"> Sleeps {allTrips[i].sleeps}</li>
+                        <li className = "list-inline-item"><i className="fa fa-calendar"></i></li>
+                        <li className = "list-inline-item"> Min Stay {allTrips[i].minStay}</li>
+                    </ul>
+                    <br></br>
+                    <br></br>
+                    <span>
+                        <strong style ={{fontSize: "16px", color: "#ff07ea", paddingLeft: "10px"}}><span> Staying from {moment(allTrips[i].bookedFrom).utc().format('DD MMMM YYYY')} to {moment(allTrips[i].bookedTo).utc().format('DD MMMM YYYY')} with {allTrips[i].NoOfGuests - 1} more travelers.</span></strong>
                         <br></br>
-                        <br></br>
-                        <span>
-                            <strong style ={{fontSize: "16px", color: "#ff07ea", paddingLeft: "10px"}}><span> Staying from {moment(allTrips[i].bookedFrom).utc().format('DD MMMM YYYY')} to {moment(allTrips[i].bookedTo).utc().format('DD MMMM YYYY')} with {allTrips[i].NoOfGuests - 1} more travelers.</span></strong>
-                            <br></br>
-                            <strong style ={{fontSize: "16px", color: "#ff07ea", paddingLeft: "10px"}}><span> You booked this Property for ${allTrips[i].price + ' /night'}.</span></strong>
-                        </span>
-                    </div>      
-                </div>
-                </div>
-            });
-        }
+                        <strong style ={{fontSize: "16px", color: "#ff07ea", paddingLeft: "10px"}}><span> You booked this Property for ${allTrips[i].price + ' /night'}.</span></strong>
+                    </span>
+                </div>      
+            </div>
+            </div>
+        });
     }
 
     render(){
@@ -132,26 +109,45 @@ class TravellerTripListings extends Component {
                         </ul>
                     </div>
                 </div>
-                <div className = "container-full">
-                {this.state.detailsFetched
-                ?
-                (
-                    <div className="container-pad">
-                        <div className="form-row myformrow">
-                            <div className="form-group col-sm-9" id = "property-listings" style ={{maxWidth : "900px"}}>
-                                { this.renderTrips() }
+                
+                <Query
+                    query={tripsfetchquery}
+                    variables={{ bookedBy: sessionStorage.getItem('cookie2') }}
+                >
+                { ({ loading, error, data }) => {
+                    if (loading) return (
+                        <div className = "container-full">
+                            <div className="container-pad" style={{textAlign: "center"}}>
+                                <h1> Fetching Trips Data... </h1>
                             </div>
                         </div>
-                    </div>
-                    )
-                    :
-                    (
-                        <div className="container-pad" style={{textAlign: "center"}}>
-                            <h1> No Trips Found! </h1>
+                        )
+                    if (error) return <div> Error </div>;
+                    console.log(data.travellertripsfetch)
+                    return (
+                        <div className = "container-full">
+                        {(data.travellertripsfetch.length > 0)
+                        ?
+                        (
+                            <div className="container-pad">
+                                <div className="form-row myformrow">
+                                    <div className="form-group col-sm-9" id = "property-listings" style ={{maxWidth : "900px"}}>
+                                        { this.renderTrips(data.travellertripsfetch) }
+                                    </div>
+                                </div>
+                            </div>
+                            )
+                            :
+                            (
+                                <div className="container-pad" style={{textAlign: "center"}}>
+                                    <h1> No Trips Found! </h1>
+                                </div>
+                            )
+                        }
                         </div>
-                    )
-                }
-                </div>
+                    );
+                }}
+                </Query>
             </div>
         )
     }

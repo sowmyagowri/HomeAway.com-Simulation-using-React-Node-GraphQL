@@ -1,8 +1,6 @@
 import React, {Component} from 'react';
 import './PropertyDetails.css';
 import 'typeface-roboto'
-import axios from 'axios';
-import cookie from 'react-cookies';
 import moment from 'moment';
 import {Navbar} from "react-bootstrap";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
@@ -13,6 +11,16 @@ import Tab from 'react-web-tabs/lib/Tab';
 import TabPanel from 'react-web-tabs/lib/TabPanel';
 import TabList from 'react-web-tabs/lib/TabList';
 import SweetAlert from 'react-bootstrap-sweetalert';
+
+import ApolloClient from 'apollo-boost';
+import { Mutation } from 'react-apollo'
+import { propertydetailsfetchquery } from '../queries/propertyqueries';
+import { bookpropertymutation } from '../mutations/bookpropertymutation';
+
+// apollo client setup
+const client = new ApolloClient({
+  uri: 'http://localhost:3001/homeaway/graphql'
+});
 
 class PropertyDetails extends Component {
     constructor(props){
@@ -36,7 +44,8 @@ class PropertyDetails extends Component {
           ddate : false,
           pguests : false,
           alert: null,
-          booked : false
+          booked : false,
+          message: "",
         };
         this.logout = this.logout.bind(this);
         this.fromDateChangeHandler = this.fromDateChangeHandler.bind(this);
@@ -47,18 +56,14 @@ class PropertyDetails extends Component {
     
     componentWillMount () {
         console.log("In Property Details");
-        var propertyID = this.state.propertyid;
 
-        var url = "http://localhost:3001/homeaway/property/" + propertyID;
-        axios.get(url)
-        .then(response => {
-            console.log("Status Code : ", response.status);
-            if(response.status === 200){
-                console.log(response.data)
-                this.setState({propertyDetails : response.data})
-            }
-            console.log(this.state.propertyDetails.headline);
-        });
+        client.query({ query: propertydetailsfetchquery,
+            variables: { propertyID: this.state.propertyid }
+            })
+            .then ( ({data}) => {
+                console.log(data);
+                this.setState({propertyDetails : data.propertydetails});                    
+            })
     }
     
     fromDateChangeHandler = (e) => { 
@@ -82,38 +87,19 @@ class PropertyDetails extends Component {
         })
     }
 
-    handleValidation(){
-        let formIsValid = true;
-    
-        //From Date
-        if(this.state.bookingFromDate < this.state.fromdate || this.state.bookingFromDate > this.state.todate){
-            alert('Arrive date should be between the searched dates');
-            formIsValid = false;
-        }
-    
-        //To Date
-        if(this.state.bookingToDate < this.state.fromdate || this.state.bookingToDate > this.state.todate){
-            alert('Depart date should be between the searched dates');
-            formIsValid = false;
-        }
+    handleValidation(error){
+        
+        error.graphQLErrors.map( errorMessage => {
+            console.log(errorMessage.message)
+            this.setState({
+                message:  errorMessage.message
+            })
+        })
 
-        if(this.state.bookingFromDate >= this.state.bookingToDate){
-            alert('Arrival date should be before departure date');
-            formIsValid = false;
-        }
-    
-         //Numberof guests
-        if(this.state.guests > this.state.noOfGuests){
-            alert("Number of guests should be less than or same as the searched criteria");
-            formIsValid = false;
-        }
-       return formIsValid;
     }
 
     logout = () => {
-        cookie.remove('cookie1', {path: '/'})
-        cookie.remove('cookie2', {path: '/'})
-        cookie.remove('cookie3', {path: '/'})
+        sessionStorage.clear();
         console.log("All cookies removed!")
         window.location = "/"
     }
@@ -139,66 +125,35 @@ class PropertyDetails extends Component {
     }
 
     submitBooking = () => {
-        if(this.handleValidation()){
-            const getAlert = () => (
-                <SweetAlert 
-                success 
-                title = "Congratulations!!"
-                onConfirm={() => this.addBooking()}> 
-                You successfully booked this property!!!
-                </SweetAlert>
-            );
-     
-            if (this.state.adate && this.state.ddate && this.state.pguests && this.state.isTravelerLoggedIn) {
-                this.setState({
-                    alert: getAlert(),
-                    //booked: true
-                })
-            } else {
-                if (!this.state.isTravelerLoggedIn){
-                    window.alert("You must be logged in to book this property!!!")}
-                else{
-                    window.alert("Please enter all the fields")
-                }
-            }
-        }
-    }
-
-    addBooking(){
+        const getAlert = () => (
+            <SweetAlert 
+            success 
+            title = "Congratulations!!"
+            onConfirm={() => window.close()}> 
+            You successfully booked this property!!!
+            </SweetAlert>
+        );
     
-        var price = this.state.price
-        price = price.toString();
-
-        var data = {
-            propertyid: this.state.propertyid,
-            bookedBy: cookie.load('cookie2'),
-            bookedFrom : this.state.bookingFromDate,
-            bookedTo : this.state.bookingToDate,
-            NoOfGuests : this.state.guests,
-            pricePaid : price
-            }
-            axios.post('http://localhost:3001/homeaway/bookproperty', data)
-            .then(response => {
-                console.log("Status Code : ",response.status);
-                if(response.status === 200){
-                    console.log("booked property")
-                    window.close();
-                }
-            });
+        if (this.state.adate && this.state.ddate && this.state.pguests && this.state.isTravelerLoggedIn) {
+            this.setState({
+                alert: getAlert(),
+            })
+        }
     }
 
     render(){
 
-        if(cookie.load('cookie1') === 'travellercookie'){
-          this.state.isTravelerLoggedIn = true
-        } 
+        if(sessionStorage.getItem('cookie1') === 'travellercookie' ){
+            this.state.isTravelerLoggedIn = true
+        }
+
         const {propertyDetails} = this.state;
 
         var start = moment(this.state.bookingFromDate, "YYYY-MM-DD");
         var end = moment(this.state.bookingToDate, "YYYY-MM-DD");
         //Difference in number of days
         var difference = (moment.duration(end.diff(start)).asDays());
-        var price = difference * propertyDetails[0].baseRate;
+        var price = difference * propertyDetails.baseRate;
 
         this.state.price = price;
 
@@ -212,6 +167,11 @@ class PropertyDetails extends Component {
                     <Navbar.Brand>
                     <a href="/" title = "HomeAway" className = "logo"><img src={require('./homeaway_logo.png')} alt="Homeaway Logo"/></a>
                     </Navbar.Brand>
+                    <div className="col-sm-12 col-sm-offset-12" style={{left: "595px", fontSize: "15px"}}>
+                        {this.state.message &&
+                            <div className={`alert alert-danger`}>{this.state.message}</div>
+                        }
+                    </div>
                 </Navbar.Header>
                 <div className="box">
                     <div>
@@ -233,7 +193,7 @@ class PropertyDetails extends Component {
                     (
                     <div>
                         <div className="btn btn-group" id="white" style = {{marginRight: "160px", width: "50px", }}>
-                            <button className="dropdown-toggle" style = {{color: "#0067db", backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {cookie.load('cookie3')}</button>
+                            <button className="dropdown-toggle" style = {{color: "#0067db", backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {sessionStorage.getItem('cookie3')} </button>
                             <div className="dropdown-menu">
                             <a className="dropdown-item" href="/traveller/mytrips"> <i className="fas fa-briefcase"></i> My Trips</a>
                             <a className="dropdown-item" href="/Profile"> <i className="fas fa-user"></i> My Profile</a>
@@ -289,27 +249,24 @@ class PropertyDetails extends Component {
                     <div className="form-row ">
                         <div className="form-group col-sm-8 FixedHeightContainer border" id = "property-listings" style ={{maxWidth : "1000px"}}>
                             <div style = {{background: "#D6EBF2"}}  className ="Content">
-                            <Carousel autoPlay showThumbs={false}>
-                            
-                                <div>
-                                    <img alt="Image 1" className="img-responsive" src={`http://localhost:3001/uploads/${propertyDetails[0].image1}`} />
-                                </div>
-                            
-                             <div>
-                                    <img alt="Image 2" className="img-responsive" src={`http://localhost:3001/uploads/${propertyDetails[0].image2}`} />
-                                </div>
-                                <div>
-                                    <img alt="Image 3" className="img-responsive" src={`http://localhost:3001/uploads/${propertyDetails[0].image3}`} />
-                                </div>
-                                <div>
-                                    <img alt="Image 4" className="img-responsive" src={`http://localhost:3001/uploads/${propertyDetails[0].image4}`} />
-                                </div>
-                            <div>
-                                    <img alt="Image 5" className="img-responsive" src={`http://localhost:3001/uploads/${propertyDetails[0].image5}`} />
-                                </div>
-                            
-                            </Carousel>
-
+                                <Carousel showThumbs={false}>
+                                    <div>
+                                        <img alt="Image 1" className="img-responsive" src={`http://localhost:3001/uploads/${propertyDetails.image1}`} />
+                                    </div>
+                                
+                                    <div>
+                                        <img alt="Image 2" className="img-responsive" src={`http://localhost:3001/uploads/${propertyDetails.image2}`} />
+                                    </div>
+                                    <div>
+                                        <img alt="Image 3" className="img-responsive" src={`http://localhost:3001/uploads/${propertyDetails.image3}`} />
+                                    </div>
+                                    <div>
+                                        <img alt="Image 4" className="img-responsive" src={`http://localhost:3001/uploads/${propertyDetails.image4}`} />
+                                    </div>
+                                <   div>
+                                        <img alt="Image 5" className="img-responsive" src={`http://localhost:3001/uploads/${propertyDetails.image5}`} />
+                                    </div>
+                                </Carousel>
                             <div>
                             <Tabs defaultTab="one"
                             onChange={(tabID) => { console.log(tabID)}}>
@@ -327,23 +284,23 @@ class PropertyDetails extends Component {
                                 </TabList>
                                 <TabPanel tabId="one">
                                     <div className = "container" style = {{marginTop : "20px"}}>
-                                        <h4 className="media-heading"><img style={{height: "35px"}} alt="Small Map" src={require('./maps-icon.png')}/>{propertyDetails[0].headline}</h4>
+                                        <h4 className="media-heading"><img style={{height: "35px"}} alt="Small Map" src={require('./maps-icon.png')}/>{propertyDetails.headline}</h4>
                                         <div className = "row" style = {{marginTop :"20px"}}>
-                                        <h2><img alt="Pindrop Sign" style={{height: "35px"}} src={require('./pindrop.png')}/>{propertyDetails[0].city}, {propertyDetails[0].state}, {propertyDetails[0].country}</h2>
+                                        <h2><img alt="Pindrop Sign" style={{height: "35px"}} src={require('./pindrop.png')}/>{propertyDetails.city}, {propertyDetails.state}, {propertyDetails.country}</h2>
                                         </div>
                                         <div className = "row" style = {{marginTop :"20px"}}>
                                         <ul className="list-inline">
-                                            <li className = "list-inline-item">{propertyDetails[0].propertyType}</li>
+                                            <li className = "list-inline-item">{propertyDetails.propertyType}</li>
                                             <li className = "list-inline-item dot"></li>
-                                            <li className = "list-inline-item"> {propertyDetails[0].bedrooms} BR</li>
+                                            <li className = "list-inline-item"> {propertyDetails.bedrooms} BR</li>
                                             <li className = "list-inline-item dot"></li>
-                                            <li className = "list-inline-item"> {propertyDetails[0].bathrooms} BA</li>
+                                            <li className = "list-inline-item"> {propertyDetails.bathrooms} BA</li>
                                             <li className = "list-inline-item dot"></li>
-                                            <li className = "list-inline-item"> Sleeps  {propertyDetails[0].sleeps}</li>
+                                            <li className = "list-inline-item"> Sleeps  {propertyDetails.sleeps}</li>
                                         </ul>
                                         </div>
                                         <div className = "row" style = {{marginTop :"10px"}}>
-                                        <p className = "para-font">{propertyDetails[0].description}</p>
+                                        <p className = "para-font">{propertyDetails.description}</p>
                                         </div> 
                                     </div>
                                 </TabPanel>
@@ -351,7 +308,7 @@ class PropertyDetails extends Component {
                                 <div className = "container" style = {{marginTop : "20px"}}>
                                         <hr/> 
                                         <div className = "row" style = {{marginTop :"20px"}}>
-                                        <p className = "para-font">{propertyDetails[0].amenities}</p>
+                                        <p className = "para-font">{propertyDetails.amenities}</p>
                                         </div>
                                     </div>
                                 </TabPanel>
@@ -362,7 +319,7 @@ class PropertyDetails extends Component {
                         <div className = "form-group col-md-3 border" style = {{height: "510px"}} >
                             <div className = "card-body " style = {{background: "#b4ecb4", width : "385px"}}>
                                 <div className="row">
-                                    <div className="col-xs-1"><h4 className="media-heading">$ {propertyDetails[0].baseRate}</h4></div>
+                                    <div className="col-xs-1"><h4 className="media-heading">$ {propertyDetails.baseRate}</h4></div>
                                     <div className="col-sm-2" style = {{marginTop : "6px"}}><h6 className="media-heading">avg/night</h6>
                                 </div>
                             </div>
@@ -405,7 +362,7 @@ class PropertyDetails extends Component {
                                 <div className = "row">
                                     <div className="col-md-8">
                                         <div className="form-group card" style = {{height: "40px", marginLeft : "-9px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}}>
-                                            <input type="text" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control"
+                                            <input type="number" style ={{height: "60px", fontFamily: "Lato,Roboto,Arial,Helvetica Neue,Helvetica,sans-serif"}} className="form-control"
                                             value={this.state.guests} onChange = {this.noOfGuestsChangeHandler} min="1"/>
                                             <span className="glyphicon glyphicon-search form-control-feedback"></span>
                                          </div>
@@ -423,9 +380,24 @@ class PropertyDetails extends Component {
                                     null
                                     )}
                                     <div className="form-group" style ={{marginLeft : "50px", marginTop : "40px"}}>
-                                        <button className="btn btn-primary" onClick = {this.submitBooking} style = {{ height: "60px", borderColor: "#ffffff", backgroundColor:"#0067db", width: "200px", borderRadius: 25}} data-effect="ripple" type="button" tabIndex="5" data-loading-animation="true">
-                                            Book Now
-                                        </button>
+                                        <Mutation
+                                            mutation={bookpropertymutation}
+                                            variables={{ propertyid: this.state.propertyid,
+                                                bookedBy: sessionStorage.getItem('cookie2'),
+                                                bookedFrom : this.state.bookingFromDate,
+                                                bookedTo : this.state.bookingToDate,
+                                                NoOfGuests : this.state.guests,
+                                                pricePaid : price
+                                            }}
+                                            onError={ error => this.handleValidation(error) }
+                                            onCompleted= { data => {this.submitBooking(data) }}
+                                        >
+                                            {mutation => (
+                                                <button className="btn btn-primary" onClick = {mutation} style = {{ height: "60px", borderColor: "#ffffff", backgroundColor:"#0067db", width: "200px", borderRadius: 25}} data-effect="ripple" type="button" tabIndex="5" data-loading-animation="true">
+                                                    Book Now
+                                                </button>
+                                            )}
+                                        </Mutation>
                                         {this.state.alert}
                                     </div>
                                 </div>
@@ -439,5 +411,5 @@ class PropertyDetails extends Component {
     )
     }
 }
-  
+
 export default PropertyDetails;

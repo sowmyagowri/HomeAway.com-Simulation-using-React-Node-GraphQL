@@ -75,48 +75,14 @@ class Profile extends Component{
         this.setState({ [e.target.name]: e.target.value });
     }
 
-    handleValidation(){
-        let formIsValid = true;
-
-        //Firstname
-        if(!this.state.firstname){
-            formIsValid = false;
+    handleValidation(error){
+        
+        error.graphQLErrors.map( errorMessage => {
+            console.log(errorMessage.message)
             this.setState({
-                firstnameMessage: "First Name is a Required field",
-                firstnameisValid: false,
-            });
-            console.log("First Name cannot be empty");
-        } else if(typeof this.state.firstname !== "undefined"){
-            if(!this.state.firstname.match(/^[a-zA-Z ]+$/)){
-                formIsValid = false;
-                this.setState({
-                    firstnameMessage: "First Name cannot contain numbers",
-                    firstnameisValid: false,
-                })
-                console.log("First Name cannot contain numbers");
-            }        
-        }
-
-        //Lastname
-        if(!this.state.lastname){
-            formIsValid = false;
-            this.setState({
-                lastnameMessage: "Last Name is a Required field",
-                lastnameisValid: false,
-            });
-            console.log("Last Name cannot be empty");
-        } else if(typeof this.state.lastname !== "undefined"){
-            if(!this.state.lastname.match(/^[a-zA-Z ]+$/)){
-                formIsValid = false;
-                this.setState({
-                    firstnameMessage: "Last Name cannot contain numbers",
-                    firstnameisValid: false,
-                })
-                console.log("Last Name cannot contain numbers");
-            }        
-        }
-
-        return formIsValid;
+                message:  errorMessage.message
+            })
+        })
    }
 
     makeEditable = (fetchedData) => {
@@ -140,13 +106,11 @@ class Profile extends Component{
     }
 
     displayMessage = async (data) => {
-        if (this.handleValidation()) {
-            const { status, message } = data.profilesave
-            if (status === 200) {
-                this.setState({
-                    message:  message
-                });
-            }
+        const { status, message } = data.profilesave
+        if (status === 200) {
+            this.setState({
+                message:  message
+            });
         }
     }
 
@@ -236,9 +200,8 @@ class Profile extends Component{
                         query={profilefetchquery}
                         variables={{ email: sessionStorage.getItem('cookie2') }}
                     >
-                        { ({ loading, error, data }) => {
+                        { ({ loading, data }) => {
                             if (loading) return <div> Fetching Profile Data....</div>;
-                            if (error) return <div> Error </div>;
                             console.log(data.profilefetch)
                             return (
                                 <div id = "profilehref" className="myprofilecontainer">
@@ -465,6 +428,7 @@ class Profile extends Component{
                         <div className="col-md-10 text-center"> 
                             <Mutation
                                 mutation={profilesavemutation}
+                                onError={ error => this.handleValidation(error) }
                                 variables={{ email: sessionStorage.getItem('cookie2'), firstname: this.state.firstname, lastname : this.state.lastname, aboutMe: this.state.aboutMe, city: this.state.city, state: this.state.state, country: this.state.country,
                                     company: this.state.company, school: this.state.school, hometown: this.state.hometown, languages: this.state.languages, gender: this.state.gender, phone: this.state.phone}}
                                 onCompleted= {data => {this.displayMessage(data)} }

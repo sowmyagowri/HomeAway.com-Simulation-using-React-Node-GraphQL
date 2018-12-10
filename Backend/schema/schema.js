@@ -153,13 +153,14 @@ const RootQuery = new GraphQLObjectType({
                     console.log("inside traveller trips fetch query")
                     pool.query('SELECT * from `bookings` a INNER JOIN `property` b ON a.propertyID = b.uid where a.bookedBy = ? ', [args.bookedBy], (error,result) => {
                         if (error) {
-                          console.log(error);
-                          console.log("Trips not found");
-                          let cookies = {
+                            console.log(error);
+                            console.log("Trips not found");
+                            
+                            let responseMessage = {
                             status: 400,
                             message: "Trips not found"
                             }
-                            resolve ( cookies )
+                            resolve ( responseMessage )
                         } else {
                             console.log(result)
                             resolve ( result );
@@ -184,13 +185,40 @@ const RootQuery = new GraphQLObjectType({
                         if (error) {
                             console.log(error);
                             console.log("unable to search database");
-                            let cookies = {
+                            let responseMessage = {
                                 status: 400,
                                 message: "unable to search database"
                             }
-                            resolve ( cookies )
+                            resolve ( responseMessage )
                         } else {
-                            resolve ( JSON.parse(JSON.stringify(result)));
+                            resolve ( result );
+                        }
+                    });
+                })
+            }
+        },
+
+        propertydetails : {
+            type : PropertyType,
+            args: {
+                propertyID: { type: GraphQLString },
+            },
+            resolve(parent, args){
+                return new Promise( (resolve, reject ) => {
+                    console.log("inside property search query")
+                    pool.query('SELECT * from `property` where uid = ? ', [args.propertyID], function (error,result) {
+                        if (error) {
+                            console.log(error);
+                            console.log("Property not found");
+                            let responseMessage = {
+                                status: 400,
+                                message: "Property not found"
+                            }
+                            resolve ( responseMessage )
+                        } else {
+                          console.log(JSON.stringify(result[0]));
+                          console.log("Property Details Found");
+                          resolve ( result[0] );
                         }
                     });
                 })
@@ -207,11 +235,11 @@ const RootQuery = new GraphQLObjectType({
                     pool.query('SELECT * from `property` where listedBy = ? ', [args.listedBy], function (error,result) {
                         if (error) {
                           console.log(error);
-                          let cookies = {
+                          let responseMessage = {
                             status: 400,
                             message: "Property not found"
                         }
-                        resolve ( cookies )
+                        resolve ( responseMessage )
                         } else {
                           var resultCopy = result;
                           async.eachOfSeries (resultCopy, function(value, i, inner_callback) {
@@ -595,9 +623,19 @@ const Mutation = new GraphQLObjectType({
             resolve(parent, args){
                 return new Promise( (resolve, reject ) => {
                     console.log("In Profile Save Mutation");
-                    if (args.firstname === "" || args.lastname === "")
-                    {
-                        resolve ("Firstname/Lastname is required")
+
+                    if(!args.firstname){
+                        reject ("First Name cannot be empty");
+                    } else if(typeof args.firstname !== "undefined"){
+                        if(!args.firstname.match(/^[a-zA-Z ]+$/)){
+                            reject ("First Name cannot contain numbers");
+                        }        
+                    } else if (!args.lastname){
+                            reject("Last Name cannot be empty");
+                    } else if(typeof args.lastname !== "undefined"){
+                            if(!args.lastname.match(/^[a-zA-Z ]+$/)){
+                                reject ("Last Name cannot contain numbers");
+                            }        
                     } else {
                         email = args.email.toLowerCase();
                         trimemail = email.trim();
@@ -618,11 +656,11 @@ const Mutation = new GraphQLObjectType({
                         }
                         
                         console.log(userData);
-                        pool.query('UPDATE users SET ? WHERE email = ?', [userData, trimemail], function (err) {
-                            if (err) {
-                            console.log(err);
+                        pool.query('UPDATE users SET ? WHERE email = ?', [userData, trimemail], function (error) {
+                            if (error) {
+                            console.log(error);
                             console.log("unable to update database");
-                            resolve ( err )
+                            resolve ( error )
                             } else {
                                 let responseMessage = {
                                     status: 200,
@@ -632,6 +670,57 @@ const Mutation = new GraphQLObjectType({
                             }
                         })
                     }
+                })
+            }
+        },
+
+        bookproperty: {
+            type : UserLoginType,
+            args: {
+                propertyid: { type: GraphQLString }, 
+                bookedBy: { type: GraphQLString }, 
+                bookedFrom : { type: GraphQLString }, 
+                bookedTo: { type: GraphQLString }, 
+                NoOfGuests: { type: GraphQLString },
+                pricePaid: { type: GraphQLInt }
+            },
+            resolve(parent, args){
+                return new Promise( (resolve, reject ) => {
+                    if ( args.bookedFrom === "" || args.bookedTo === "" || args.NoOfGuests === "" ) {
+                        reject ("The input fields cannot be empty")
+                    }
+
+                    if ( args.bookedFrom > args.bookedTo) {
+                        reject ("From Date should be before To Date")
+                    }
+
+                    if (args.bookedBy === null ) {
+                        reject ("The Traveller should be logged in to book property")
+                    }
+
+                    var userData = {
+                        bookedBy: args.bookedBy,
+                        bookedFrom: args.bookedFrom,
+                        bookedTo: args.bookedTo,
+                        propertyID: args.propertyid,
+                        NoOfGuests : args.NoOfGuests,
+                        price: args.pricePaid,
+                    }
+                    pool.query('INSERT INTO `bookings` SET ?',userData, function (error,result) {
+                        if (error) {
+                            console.log(error);
+                            console.log("unable to insert into bookings database");
+                            resolve ( error )
+                        } else {
+                            console.log(result);
+                            console.log("Booking Added");
+                            let responseMessage = {
+                                status: 200,
+                                message: "Profile Updated"
+                            }
+                            resolve ( responseMessage )
+                        }
+                    });
                 })
             }
         },

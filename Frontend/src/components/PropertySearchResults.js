@@ -81,7 +81,7 @@ class PropertySearchResults extends Component {
                                 
                             </span>
                         </div>
-                        <Link className="view" to={`/property/${searchData[i]._id}/${this.state.location}/${this.state.fromdate}/${this.state.todate}/${this.state.noOfGuests}`} target="_blank">Dummy Link</Link>
+                        <Link className="view" to={`/property/${searchData[i].uid}/${this.state.location}/${this.state.fromdate}/${this.state.todate}/${this.state.noOfGuests}`} target="_blank">Dummy Link</Link>
                     </div>
                 </div>
             </div>

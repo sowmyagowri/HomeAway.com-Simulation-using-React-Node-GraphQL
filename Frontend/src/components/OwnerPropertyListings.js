@@ -4,13 +4,8 @@ import './OwnerPropertyListings.css';
 import {Redirect} from 'react-router';
 import {Navbar} from "react-bootstrap";
 import moment from 'moment';
-import ApolloClient from 'apollo-boost';
+import { Query } from 'react-apollo'
 import { ownerpropertylistingsquery } from '../queries/propertyqueries';
-
-// apollo client setup
-const client = new ApolloClient({
-    uri: 'http://localhost:3001/homeaway/graphql'
-});
 
 class OwnerPropertyListings extends Component {
     
@@ -32,118 +27,94 @@ class OwnerPropertyListings extends Component {
         console.log("All cookies removed!")
         window.location = "/"
     }
+    
+    renderListings (allListings) {
+        return Object.keys(allListings).map((i) => {
+            return <div className="brdr bgc-fff pad-10 box-shad btm-mrg-20 myborder1 property-listing" key={allListings[i].ID}>
+            <div className="media">
+                <a className="pull-left"  target="_parent">
+                <img alt="Thumbnail View of Property" className="img-responsive" src={`http://localhost:3001/uploads/${allListings[i].image1}`} /></a>
+                <div className="media-body">  
+                    <h4 className="myh4" style={{paddingLeft: "10px"}}>{allListings[i].headline}</h4>
+                    
+                    <h6 className="myh6" style={{paddingLeft: "10px", justifyContent: "true"}}>{allListings[i].description}</h6>
 
-    componentDidMount(){
-    
-        client.query({ query: ownerpropertylistingsquery, variables: { listedBy: sessionStorage.getItem('cookie2') }})
-            .then (data => {
-                console.log(data)
-                if ( data.data.ownerpropertylistings.length > 0) {
-                    this.setState({
-                        allListings : data.data.ownerpropertylistings,
-                        isLoading : false,
-                        detailsFetched: true
-                    });
-                }
-            })
-    }
-    
-    renderListings () {
-        const {allListings} = this.state;
-        const {isLoading} = this.state;
+                    <ul className="list-inline" style={{paddingLeft: "10px"}}>
+                        <li className = "list-inline-item"><img alt="Pindrop Sign" style={{height: "35px"}} src={require('./pindrop.png')}/></li>
+                        <li className = "list-inline-item">{allListings[i].streetAddress}</li>
+                        <li className = "list-inline-item">{allListings[i].city}</li>
+                        <li className = "list-inline-item">{allListings[i].state}</li>
+                        <li className = "list-inline-item">{allListings[i].country}</li>
+                    </ul>
 
-        if(!isLoading){
-            return Object.keys(allListings).map((i) => {
-                    return <div className="brdr bgc-fff pad-10 box-shad btm-mrg-20 myborder1 property-listing" key={allListings[i].ID}>
-                    <div className="media">
-                        <a className="pull-left"  target="_parent">
-                        <img alt="Thumbnail View of Property" className="img-responsive" src={`http://localhost:3001/uploads/${allListings[i].image1}`} /></a>
-                        <div className="media-body">  
-                            <h4 className="myh4" style={{paddingLeft: "10px"}}>{allListings[i].headline}</h4>
-                           
-                            <h6 className="myh6" style={{paddingLeft: "10px", justifyContent: "true"}}>{allListings[i].description}</h6>
-  
-                            <ul className="list-inline" style={{paddingLeft: "10px"}}>
-                                <li className = "list-inline-item"><img alt="Pindrop Sign" style={{height: "35px"}} src={require('./pindrop.png')}/></li>
-                                <li className = "list-inline-item">{allListings[i].streetAddress}</li>
-                                <li className = "list-inline-item">{allListings[i].city}</li>
-                                <li className = "list-inline-item">{allListings[i].state}</li>
-                                <li className = "list-inline-item">{allListings[i].country}</li>
-                            </ul>
-    
-                            <ul className="list-inline" style={{paddingLeft: "10px"}}>
-                                <li className = "list-inline-item"><i className="fas fa-home"></i></li>
-                                <li className = "list-inline-item">{allListings[i].propertyType}</li>
-                                <li className = "list-inline-item"><i className="fas fa-bed"></i></li>
-                                <li className = "list-inline-item"> {allListings[i].bedrooms} BR</li>
-                                <li className = "list-inline-item"><i className="fas fa-bath"></i></li>
-                                <li className = "list-inline-item"> {allListings[i].bathrooms} BA</li>
-                                <li className = "list-inline-item"> <i className="fas fa-user"></i></li>
-                                <li className = "list-inline-item"> Sleeps {allListings[i].sleeps}</li>
-                                <li className = "list-inline-item"><i className="fa fa-calendar"></i></li>
-                                <li className = "list-inline-item"> Min Stay {allListings[i].minStay}</li>
-                            </ul>
-    
-                            <span>
-                                <strong style ={{fontSize: "20px", paddingLeft: "10px"}}><span>{allListings[i].currency + ' ' + allListings[i].baseRate + ' /night'}</span></strong>
-                            </span>
-                            <br></br>
-                            <br></br>
-                            <span>
-                                <strong style ={{fontSize: "16px", color: "#ff07ea", paddingLeft: "10px"}}><span> Listed From {moment(allListings[i].startDate).utc().format('DD MMMM YYYY')} To {moment(allListings[i].endDate).utc().format('DD MMMM YYYY')}</span></strong>
-                            </span>
+                    <ul className="list-inline" style={{paddingLeft: "10px"}}>
+                        <li className = "list-inline-item"><i className="fas fa-home"></i></li>
+                        <li className = "list-inline-item">{allListings[i].propertyType}</li>
+                        <li className = "list-inline-item"><i className="fas fa-bed"></i></li>
+                        <li className = "list-inline-item"> {allListings[i].bedrooms} BR</li>
+                        <li className = "list-inline-item"><i className="fas fa-bath"></i></li>
+                        <li className = "list-inline-item"> {allListings[i].bathrooms} BA</li>
+                        <li className = "list-inline-item"> <i className="fas fa-user"></i></li>
+                        <li className = "list-inline-item"> Sleeps {allListings[i].sleeps}</li>
+                        <li className = "list-inline-item"><i className="fa fa-calendar"></i></li>
+                        <li className = "list-inline-item"> Min Stay {allListings[i].minStay}</li>
+                    </ul>
 
-                            <br></br><br></br><br></br>
-                            {allListings[i].byTraveller.length > 0
-                                ?
-                                (   
-                                    <div>
-                                        <table className="table table-striped" id="bookings">
-                                            <thead>
-                                                <tr>
-                                                    <th>Booking ID</th>
-                                                    <th>Booked By</th>
-                                                    <th>From</th>
-                                                    <th>To</th>
-                                                    <th>No. Of Guests</th>
-                                                    <th>Price</th>
-                                                </tr>
-                                            </thead>
-                                            { this.renderbookingTable(allListings[i]) }
-                                        </table>
-                                    </div>
-                                )
-                                :
-                                (
-                                    <div className = "container-full">
-                                        <h2> No Booking History! </h2>
-                                    </div>
-                                )
-                            }
-                        </div>      
-                    </div>
-                </div>
-            });
-        }
+                    <span>
+                        <strong style ={{fontSize: "20px", paddingLeft: "10px"}}><span>{allListings[i].currency + ' ' + allListings[i].baseRate + ' /night'}</span></strong>
+                    </span>
+                    <br></br>
+                    <br></br>
+                    <span>
+                        <strong style ={{fontSize: "16px", color: "#ff07ea", paddingLeft: "10px"}}><span> Listed From {moment(allListings[i].startDate).utc().format('DD MMMM YYYY')} To {moment(allListings[i].endDate).utc().format('DD MMMM YYYY')}</span></strong>
+                    </span>
+
+                    <br></br><br></br><br></br>
+                    {allListings[i].byTraveller.length > 0
+                        ?
+                        (   
+                            <div>
+                                <table className="table table-striped" id="bookings">
+                                    <thead>
+                                        <tr>
+                                            <th>Booking ID</th>
+                                            <th>Booked By</th>
+                                            <th>From</th>
+                                            <th>To</th>
+                                            <th>No. Of Guests</th>
+                                            <th>Price</th>
+                                        </tr>
+                                    </thead>
+                                    { this.renderbookingTable(allListings[i]) }
+                                </table>
+                            </div>
+                        )
+                        :
+                        (
+                            <div className = "container-full">
+                                <h2> No Booking History! </h2>
+                            </div>
+                        )
+                    }
+                </div>      
+            </div>
+            </div>
+        });
     }
 
     renderbookingTable (listingData) {
-        const {isLoading} = this.state;
-        if(!isLoading){
-            console.log("generating table content...")
-            return Object.keys(listingData.byTraveller).map( (j) => {
-                return <tbody data-ng-repeat="bookingData in listingData[i]">
-                            <tr>
-                                <td>{listingData.bookingid[j]}</td>
-                                <td>{listingData.byTraveller[j]}</td>
-                                <td>{moment(listingData.fromDate[j]).utc().format('DD MMMM YYYY')}</td>
-                                <td>{moment(listingData.toDate[j]).utc().format('DD MMMM YYYY')}</td>
-                                <td>{listingData.totalGuests[j]}</td>
-                                <td>$ {listingData.bookingPrice[j]}</td>
-                            </tr>
-                        </tbody>
-            });
-        }
+        return Object.keys(listingData.byTraveller).map( (j) => {
+            return <tbody data-ng-repeat="bookingData in listingData[i]">
+                        <tr>
+                            <td>{listingData.bookingid[j]}</td>
+                            <td>{listingData.byTraveller[j]}</td>
+                            <td>{moment(listingData.fromDate[j]).utc().format('DD MMMM YYYY')}</td>
+                            <td>{moment(listingData.toDate[j]).utc().format('DD MMMM YYYY')}</td>
+                            <td>{listingData.totalGuests[j]}</td>
+                            <td>$ {listingData.bookingPrice[j]}</td>
+                        </tr>
+                    </tbody>
+        });
     }
 
     render(){
@@ -185,26 +156,44 @@ class OwnerPropertyListings extends Component {
                         </ul>
                     </div>
                 </div>
-                <div className = "container-full">
-                {this.state.detailsFetched
-                ?
-                (
-                    <div className="container-pad">
-                        <div className="form-row myformrow">
-                            <div className="form-group col-sm-9" id = "property-listings" style ={{maxWidth : "900px"}}>
-                                { this.renderListings() }
+                <Query
+                    query={ownerpropertylistingsquery}
+                    variables= { {listedBy: sessionStorage.getItem('cookie2') }}
+                >
+                { ({ loading, error, data }) => {
+                    if (loading) return (
+                        <div className = "container-full">
+                            <div className="container-pad" style={{textAlign: "center"}}>
+                                <h1> Fetching Listed Properties... </h1>
                             </div>
                         </div>
-                    </div>
-                )
-                :
-                (
-                    <div className="container-pad" style={{textAlign: "center"}}>
-                        <h1> You have not listed any Property! </h1>
-                    </div>
-                )
-                }
-                </div>                        
+                        )
+                    if (error) return <div> Error </div>;
+                    console.log(data.ownerpropertylistings)
+                    return (
+                        <div className = "container-full">
+                        { (data.ownerpropertylistings.length > 0)
+                        ?
+                        (
+                            <div className="container-pad">
+                                <div className="form-row myformrow">
+                                    <div className="form-group col-sm-9" id = "property-listings" style ={{maxWidth : "900px"}}>
+                                        { this.renderListings(data.ownerpropertylistings) }
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                        :
+                        (
+                            <div className="container-pad" style={{textAlign: "center"}}>
+                                <h1> You have not listed any Property! </h1>
+                            </div>
+                        )
+                        }
+                        </div>          
+                        );
+                    }}
+                    </Query>              
             </div>
         )
     }
