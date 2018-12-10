@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
 import 'typeface-roboto'
 import './PropertySearchResults.css';
-import axios from 'axios';
-import cookie from 'react-cookies';
 import {Navbar} from "react-bootstrap";
 import Helmet from 'react-helmet';
 import { Link } from 'react-router-dom';
+import { Query } from 'react-apollo'
+import { propertysearchquery } from '../queries/propertyqueries';
 
 var longitude, lattitude, locationTitle;
 
@@ -16,16 +16,10 @@ class PropertySearchResults extends Component {
         console.log("Parameters are: ");
         console.log(this.props.history);
         this.state = {
-            email: "",
-            isTravelerLoggedIn: false,
-            detailsFetched:false,
-            isLoading : true,
-            searchData:[{}],
+            search : false,
         };
-        this.locationChangeHandler = this.locationChangeHandler.bind(this);
-        this.fromDateChangeHandler = this.fromDateChangeHandler.bind(this);
-        this.toDateChangeHandler = this.toDateChangeHandler.bind(this);
-        this.noOfGuestsChangeHandler = this.noOfGuestsChangeHandler.bind(this);
+
+        this.changeHandler = this.changeHandler.bind(this);
         this.handleValidation = this.handleValidation.bind(this);
         this.searchPlace = this.searchPlace.bind(this);
         this.renderSearchResult = this.renderSearchResult.bind(this);
@@ -33,103 +27,73 @@ class PropertySearchResults extends Component {
     }
 
     logout = () => {
-        cookie.remove('cookie1', {path: '/'})
-        cookie.remove('cookie2', {path: '/'})
-        cookie.remove('cookie3', {path: '/'})
+        sessionStorage.clear();
         console.log("All cookies removed!")
         window.location = "/"
     }
     
-  componentWillMount(){
-    this.setState ({ 
-        location : this.props.location.state?this.props.location.state.location:"",
-        fromdate : this.props.location.state?this.props.location.state.fromDate:"",
-        todate : this.props.location.state?this.props.location.state.toDate:"",
-        noOfGuests: this.props.location.state?this.props.location.state.noOfGuests:""
-    })
-
-        const data = { 
-            city : this.props.location.state?this.props.location.state.location:"",
-            startDate : this.props.location.state?this.props.location.state.fromDate:"",
-            endDate : this.props.location.state?this.props.location.state.toDate:"",
-            noOfGuests: this.props.location.state?this.props.location.state.noOfGuests:""
-        }
-        console.log("Calling Property Search in Will mount");
-        console.log(data);
-        axios.post('http://localhost:3001/homeaway/property/search', data)
-        .then(response => {
-            console.log("Status Code : ",response.status);
-            if(response.status === 200){
-                console.log(response.data)
-                this.setState({
-                    searchData : response.data,
-                    isLoading : false,
-                });
-            }
+    componentWillMount(){
+        this.setState ({ 
+            location : this.props.location.state?this.props.location.state.location:"",
+            fromdate : this.props.location.state?this.props.location.state.fromDate:"",
+            todate : this.props.location.state?this.props.location.state.toDate:"",
+            noOfGuests: this.props.location.state?this.props.location.state.noOfGuests:"",
         })
     }
 
-    renderSearchResult () {
-        const {searchData} = this.state;
-        const {isLoading} = this.state;
-        if(!isLoading){
-            return Object.keys(searchData).map((i) => {
-                    return <div className="brdr bgc-white pad-10 box-shad btm-mrg-20 property-listing" key={searchData[i].ID}>
-                    <div className="media">
-                        <a className="pull-left" href="" target="_parent">
-                        <img alt="Thumbnail View of Property" className="img-responsive" src={`http://localhost:3001/uploads/${searchData[i].image1}`} /></a>
-                        <div className="clearfix visible-sm"> </div>
-                        <div className="media-body fnt-smaller">
-                                <input id = "heading" value = {searchData[i].headline} type="text" readOnly="readOnly" />
-                                <br></br><br></br>
-                                <ul className="list-inline">
-                                    <li className = "list-inline-item">{searchData[i].propertyType}</li>
-                                    <li className = "list-inline-item dot"></li>
-                                    <li className = "list-inline-item"> {searchData[i].bedrooms} BR</li>
-                                    <li className = "list-inline-item dot"></li>
-                                    <li className = "list-inline-item"> {searchData[i].bathrooms} BA</li>
-                                    <li className = "list-inline-item dot"></li>
-                                    <li className = "list-inline-item"> Sleeps  {searchData[i].sleeps}</li>
-                                </ul>
-                                <br></br><br></br>
-                                <input style ={{background: "rgb(216, 245, 157)", width: "595px"}} id = "heading" value = {searchData[i].currency + ' ' + searchData[i].baseRate} type="text" readOnly="readOnly" />
-
-                                <Link className="view" to={`/property/${searchData[i].uid}/${this.state.location}/${this.state.fromdate}/${this.state.todate}/${this.state.noOfGuests}`} target="_blank">Dummy Link</Link>
+    renderSearchResult (searchData) {
+        return Object.keys(searchData).map((i) => {
+            return <div className="brdr bgc-white box-shad1 btm-mrg-20 property-listing" key={searchData[i].ID}>
+            <div className="media">
+                <img alt="Thumbnail View of Property" style={{height: "230px", width: "240px"}}src={`http://localhost:3001/uploads/${searchData[i].image1}`} />
+                <div className="clearfix visible-sm"> </div>
+                    <div className="media-body fnt-smaller">
+                        <input id = "heading" style={{paddingLeft: "10px"}} value = {searchData[i].headline} type="text" readOnly="readOnly" />
+                        <br></br><br></br>
+                        <ul className="list-inline" style={{paddingLeft: "10px"}}>
+                            <li className = "list-inline-item"><i className="fas fa-home"></i></li>
+                            <li className = "list-inline-item">{searchData[i].propertyType}</li>
+                            <li className = "list-inline-item"><i className="fas fa-bed"></i></li>
+                            <li className = "list-inline-item"> {searchData[i].bedrooms} BR</li>
+                            <li className = "list-inline-item"><i className="fas fa-bath"></i></li>
+                            <li className = "list-inline-item"> {searchData[i].bathrooms} BA</li>
+                            <li className = "list-inline-item"><i className="fas fa-user"></i></li>
+                            <li className = "list-inline-item"> Sleeps  {searchData[i].sleeps}</li>
+                        </ul>
+                        <br></br><br></br><br></br>
+                        <div className="input-group">
+                            <span className="input-group-prepend">
+                                <div className="input-group-text" style={{border: "none"}}><i className="fa fa-bolt" style={{fontSize: "24px"}}></i></div>
+                            </span>
+                            <input type="text" className="form-control" style ={{background: "#ededed"}} id = "heading1" defaultValue = {searchData[i].currency + ' ' + searchData[i].baseRate} readOnly="true" />
                         </div>
+                        <div className="input-group">
+                            <h5 style ={{background: "#ededed", width: "503px"}}> <small>View details for total price</small> </h5>
+                            <span className="input-group-append" style={{height: "22px",}}>
+                                <div className="input-group-text" style={{border: "none"}}>
+                                    <i className="fas fa-star" style={{fontSize: "10px"}}></i>
+                                    <i className="fas fa-star" style={{fontSize: "10px"}}></i>
+                                    <i className="fas fa-star" style={{fontSize: "10px"}}></i>
+                                    <i className="fas fa-star" style={{fontSize: "10px"}}></i>
+                                    <i className="fas fa-star" style={{fontSize: "10px"}}></i>
+                                    (1)
+                                </div>
+                                
+                            </span>
+                        </div>
+                        <Link className="view" to={`/property/${searchData[i]._id}/${this.state.location}/${this.state.fromdate}/${this.state.todate}/${this.state.noOfGuests}`} target="_blank">Dummy Link</Link>
                     </div>
-        
                 </div>
-            });
-            }
+            </div>
+    });
     }
 
-    //search searchLocation change handler to update state variable with the text entered by the user
-    locationChangeHandler = (e) => {
-    this.setState({
-        location : e.target.value
-    })
-  }
-
-  //From date change handler to update state variable with the text entered by the user
-  fromDateChangeHandler = (e) => {
-      this.setState({
-        fromdate : e.target.value
-      })
-  }
-  
-  //To date change handler to update state variable with the text entered by the user
-  toDateChangeHandler = (e) => {
-    this.setState({
-        todate : e.target.value
-    })
-  }
-
-  //Number of guests change handler to update state variable with the text entered by the user
-  noOfGuestsChangeHandler = (e) => {
-    this.setState({
-        noOfGuests : e.target.value
-    })
-  }
+    //searchLocation, fromdate, todate, no.ofGuests change handler to update state variable with the text entered by the user
+    changeHandler(e) {
+        console.log(e.target.value);
+        const { name, value } = e.target;
+        this.setState({ [name]: value });
+    }
 
     handleValidation(){
         let formIsValid = true;
@@ -191,26 +155,8 @@ class PropertySearchResults extends Component {
         //prevent page from refresh
         event.preventDefault();
         if(this.handleValidation()){
-            const data = {
-            city : this.state.location,
-            startDate : this.state.fromdate,
-            endDate : this.state.todate,
-            noOfGuests : this.state.noOfGuests
-            }
-        
-            //set the with credentials to true
-            axios.defaults.withCredentials = true;
-            //make a post request with the user data
-            axios.post('http://localhost:3001/homeaway/property/search', data)
-                .then(response => {
-                    console.log("Status Code : ",response.status);
-                    if(response.status === 200){
-                        console.log(response.data)
-                        this.setState({
-                            searchData : response.data,
-                            isLoading : false,
-                       });
-                    }
+            this.setState ({
+                search: true,
             })
         }
     }
@@ -222,7 +168,6 @@ class PropertySearchResults extends Component {
             locationTitle = this.state.location
         }
         if(this.state.location.toLowerCase() === "sunnyvale"){
-            console.log("I am in location");
             lattitude = 37.3688;
             longitude = -122.0363;
             locationTitle = this.state.location
@@ -242,18 +187,11 @@ class PropertySearchResults extends Component {
             longitude = -122.431297;
             locationTitle = this.state.location
         }
-        console.log('cookie1');
-        if(cookie.load('cookie1') === 'travellercookie'){
-            this.state.isTravelerLoggedIn = true
-        }
 
-        if (this.state.searchData.length === 0) {
-            this.state.detailsFetched = false 
+        let isTravelerLoggedIn = false;
+        if(sessionStorage.getItem('cookie1')){
+            isTravelerLoggedIn = true
         }
-        else {
-            this.state.detailsFetched = true 
-        }
-        console.log(lattitude, longitude)
         return(
           <div>
             <Helmet>
@@ -270,7 +208,7 @@ class PropertySearchResults extends Component {
                         <img style={{marginTop: "13px"}} alt="US Flag" src={require('./us_flag.png')}/>
                     </div>
                     <button id="blue" className="btn" style = {{fontColor : "black", backgroundColor:"white", background:"white", borderColor:"white"}} type="button"><a >Trip Boards</a></button>
-                    {!this.state.isTravelerLoggedIn 
+                    {!isTravelerLoggedIn 
                     ?
                     (
                     <div className="btn btn-group" id="white">
@@ -285,7 +223,7 @@ class PropertySearchResults extends Component {
                     (
                     <div>
                         <div className="btn btn-group" id="white" style = {{marginRight: "160px", width: "50px", }}>
-                            <button className="dropdown-toggle" style = {{color: "#0067db", backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {cookie.load('cookie3')}</button>
+                            <button className="dropdown-toggle" style = {{color: "#0067db", backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Hello {sessionStorage.getItem('cookie3')} </button>
                             <div className="dropdown-menu">
                             <a className="dropdown-item" href="/traveller/mytrips"> <i className="fas fa-briefcase"></i> My Trips</a>
                             <a className="dropdown-item" href="/Profile"> <i className="fas fa-user"></i> My Profile</a>
@@ -335,7 +273,7 @@ class PropertySearchResults extends Component {
                         </div>
                         <div className="col-md-offset-3" style = {{marginLeft: "13px"}}>
                         <div className="form-group">
-                            <button className="btn btn-primary" onClick = {this.searchPlace} style = {{ height: "60px", borderColor: "#ffffff", backgroundColor:"#0067db", width: "120px", borderRadius: 25}} data-effect="ripple" type="button" tabIndex="5" data-loading-animation="true">
+                            <button className="btn btn-primary" onClick = {this.searchPlace} style = {{ height: "60px", borderColor: "#ffffff", backgroundColor:"#0067db", width: "120px", borderRadius: 25}} data-effect="ripple" type="button" tabIndex="5" data-loading-animation="true" hidden="true">
                                 Search
                             </button>
                         </div>
@@ -343,48 +281,69 @@ class PropertySearchResults extends Component {
                     </div>
                 </div>
             </Navbar>
-            {this.state.detailsFetched 
-              ?
-              (
-                <div className = "container-full">
-                    <div className="container-pad">
-                        <div className="form-row">
-                            <div className="form-group col-sm-8" id = "property-listings" style ={{maxWidth : "800px"}}>
-                                <div className ="Content">
-                                    { this.renderSearchResult() }
-                                </div>
-                            </div>
-                            <div className = "form-group col-sm-5" style = {{marginLeft: "20px", width : "800px"}}>
-                                <div className = "card-body border">
-                                    <Map
-                                        id="myMap"
-                                        options={{
-                                        center: { lat: lattitude, lng:  longitude },
-                                        zoom: 8
-                                        }}
-                                        onMapLoad={map => {
-                                            new window.google.maps.Marker({
-                                                position: { lat: lattitude, lng:  longitude},
-                                                map: map,
-                                                title: locationTitle
-                                            });
-                                        }}
-                                    />
-                                </div>
+            <Query 
+                query={propertysearchquery}
+                variables={{ 
+                    city : this.state.location,
+                    startDate : this.state.fromdate,
+                    endDate : this.state.todate,
+                    noOfGuests: this.state.noOfGuests
+                }}
+            >
+                { ({ loading, error, data }) => {
+                    if (loading) return (
+                        <div className = "container-full">
+                            <div className="container-pad" style={{textAlign: "center"}}>
+                                <h1> Fetching Search Data... </h1>
                             </div>
                         </div>
-                    </div>
-                </div>
-              )
-              :
-              (
-                <div className = "container-full">
-                    <div className="container-pad">
-                        <h1> There are no listings matching your criteria </h1>
-                    </div>
-                </div>
-              )
-            }
+                        )
+                    if (error) return <div> Error </div>;
+                    console.log(data.propertysearch)
+                    return (
+                            <div className = "container-full">
+                            {(data.propertysearch.length > 0)                                   
+                            ?
+                            (
+                                <div className="container-pad">
+                                    <div className="form-row">
+                                        <div className="form-group col-sm-8" id = "property-listings" style ={{maxWidth : "800px"}}>
+                                            <div className ="Content">
+                                                { this.renderSearchResult(data.propertysearch) }
+                                            </div>
+                                        </div>
+                                        <div className = "form-group col-sm-5" style = {{marginLeft: "20px", width : "800px"}}>
+                                            <div className = "card-body border">
+                                                <Map
+                                                    id="myMap"
+                                                    options={{
+                                                    center: { lat: lattitude, lng:  longitude },
+                                                    zoom: 8
+                                                    }}
+                                                    onMapLoad={map => {
+                                                        new window.google.maps.Marker({
+                                                            position: { lat: lattitude, lng:  longitude},
+                                                            map: map,
+                                                            title: locationTitle
+                                                        });
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                            :
+                            (   
+                                <div className="container-pad" style={{textAlign: "center"}}>
+                                    <h1> There are no listings matching your criteria </h1>
+                                </div>
+                            )
+                            }
+                        </div>
+                    );
+                }}
+            </Query>
         </div>
         )
     }

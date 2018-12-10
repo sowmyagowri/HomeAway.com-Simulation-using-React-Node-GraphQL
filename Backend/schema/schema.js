@@ -1,19 +1,21 @@
 const graphql = require('graphql');
+const graphqldate =  require('graphql-iso-date');
 const _ = require('lodash');
 var pool = require('../src/models/UserDB');
 var crypt = require('../src/models/bcrypt.js');
-var validator = require('validator');
+var async = require('async');
 
 const {
     GraphQLObjectType,
     GraphQLString,
     GraphQLSchema,
-    GraphQLID,
     GraphQLInt,
     GraphQLList,
-    GraphQLNonNull,
-    GraphQLBoolean
 } = graphql;
+
+const {
+    GraphQLDate,
+  } = graphqldate;
 
 const UserLoginType = new GraphQLObjectType({
     name: 'UserLogin',
@@ -40,7 +42,80 @@ const UserProfileType = new GraphQLObjectType({
         school: { type: GraphQLString },
         hometown: { type: GraphQLString },
         gender: { type: GraphQLString },
-        phone: { type: GraphQLInt },
+        phone: { type: GraphQLString },
+    })
+});
+
+const TravellerTripsType = new GraphQLObjectType({
+    name: 'TravellerTrips',
+    fields: ( ) => ({
+        bookedBy:{ type: GraphQLString },
+        bookedFrom: { type: GraphQLDate },
+        bookedTo: { type: GraphQLDate },
+        propertyID: { type: GraphQLInt },
+        NoOfGuests: { type: GraphQLInt },
+        price: { type: GraphQLInt },
+        bookingID: { type: GraphQLInt },
+        listedBy: { type: GraphQLString },
+        startDate: { type: GraphQLDate },
+        endDate: { type: GraphQLDate },
+        sleeps: { type: GraphQLInt },
+        bedrooms: { type: GraphQLInt },
+        bathrooms: { type: GraphQLInt },
+        baseRate: { type: GraphQLInt },
+        country: { type: GraphQLString },
+        city: { type: GraphQLString },
+        state: { type: GraphQLString },
+        zipcode: { type: GraphQLInt },
+        headline: { type: GraphQLString },
+        description: { type: GraphQLString },
+        currency: { type: GraphQLString },
+        minStay: { type: GraphQLInt },
+        amenities: { type: GraphQLString },
+        streetAddress: { type: GraphQLString },
+        propertyType: { type: GraphQLString },
+        uid: { type: GraphQLInt },
+        image1: { type: GraphQLString },
+        image2: { type: GraphQLString },
+        image3: { type: GraphQLString },
+        image4: { type: GraphQLString },
+        image5: { type: GraphQLString },
+    })
+});
+
+const PropertyType = new GraphQLObjectType({
+    name: 'Properties',
+    fields: ( ) => ({
+        listedBy: { type: GraphQLString },
+        startDate: { type: GraphQLDate },
+        endDate: { type: GraphQLDate },
+        sleeps: { type: GraphQLInt },
+        bedrooms: { type: GraphQLInt },
+        bathrooms: { type: GraphQLInt },
+        baseRate: { type: GraphQLInt },
+        country: { type: GraphQLString },
+        city: { type: GraphQLString },
+        state: { type: GraphQLString },
+        zipcode: { type: GraphQLInt },
+        headline: { type: GraphQLString },
+        description: { type: GraphQLString },
+        currency: { type: GraphQLString },
+        minStay: { type: GraphQLInt },
+        amenities: { type: GraphQLString },
+        streetAddress: { type: GraphQLString },
+        propertyType: { type: GraphQLString },
+        uid: { type: GraphQLInt },
+        image1: { type: GraphQLString },
+        image2: { type: GraphQLString },
+        image3: { type: GraphQLString },
+        image4: { type: GraphQLString },
+        image5: { type: GraphQLString },
+        fromDate: {type: new GraphQLList( GraphQLString )},
+        toDate: { type: new GraphQLList( GraphQLString ) },
+        byTraveller: { type: new GraphQLList ( GraphQLString ) },
+        totalGuests: { type: new GraphQLList ( GraphQLString ) },
+        bookingPrice: { type: new GraphQLList( GraphQLString ) },
+        bookingid: { type: new GraphQLList( GraphQLString ) },
     })
 });
 
@@ -55,7 +130,7 @@ const RootQuery = new GraphQLObjectType({
             },
             resolve(parent, args){
                 return new Promise( (resolve, reject ) => {
-                    console.log(args.email);
+                    console.log("inside profile fetch query")
                     pool.query('SELECT * FROM users WHERE email = ?', [args.email], (err, result) => {
                         if (err){
                             console.log(err);
@@ -66,7 +141,125 @@ const RootQuery = new GraphQLObjectType({
                     })
                 })
             }
-        }
+        },
+
+        travellertripsfetch : {
+            type : new GraphQLList(TravellerTripsType),
+            args: {
+                bookedBy: { type: GraphQLString }
+            },
+            resolve(parent, args){
+                return new Promise( (resolve, reject ) => {
+                    console.log("inside traveller trips fetch query")
+                    pool.query('SELECT * from `bookings` a INNER JOIN `property` b ON a.propertyID = b.uid where a.bookedBy = ? ', [args.bookedBy], (error,result) => {
+                        if (error) {
+                          console.log(error);
+                          console.log("Trips not found");
+                          let cookies = {
+                            status: 400,
+                            message: "Trips not found"
+                            }
+                            resolve ( cookies )
+                        } else {
+                            console.log(result)
+                            resolve ( result );
+                        }
+                    });
+                })
+            }
+        },
+
+        propertysearch : {
+            type : new GraphQLList(PropertyType),
+            args: {
+                city: { type: GraphQLString },
+                startDate: { type: GraphQLString },
+                endDate: { type: GraphQLString },
+                noOfGuests: { type: GraphQLString },
+            },
+            resolve(parent, args){
+                return new Promise( (resolve, reject ) => {
+                    console.log("inside property search query")
+                    pool.query('SELECT * from `property` where (uid NOT IN (SELECT propertyID from `bookings` where ((? BETWEEN bookedFrom AND bookedTo) OR (? BETWEEN bookedFrom AND bookedTo)))) and city = ? and startDate <= ? and endDate >= ? and sleeps >= ?', [args.startDate, args.endDate, args.city.toLowerCase(), args.startDate, args.endDate, args.noOfGuests], function (error,result) {
+                        if (error) {
+                            console.log(error);
+                            console.log("unable to search database");
+                            let cookies = {
+                                status: 400,
+                                message: "unable to search database"
+                            }
+                            resolve ( cookies )
+                        } else {
+                            resolve ( JSON.parse(JSON.stringify(result)));
+                        }
+                    });
+                })
+            }
+        },
+
+        ownerpropertylistings : {
+            type : new GraphQLList(PropertyType),
+            args: {
+                listedBy: { type: GraphQLString },
+            },
+            resolve(parent, args){
+                return new Promise( (resolve, reject ) => {
+                    pool.query('SELECT * from `property` where listedBy = ? ', [args.listedBy], function (error,result) {
+                        if (error) {
+                          console.log(error);
+                          let cookies = {
+                            status: 400,
+                            message: "Property not found"
+                        }
+                        resolve ( cookies )
+                        } else {
+                          var resultCopy = result;
+                          async.eachOfSeries (resultCopy, function(value, i, inner_callback) {
+                            value.fromDate = []
+                            value.toDate = []
+                            value.byTraveller = []
+                            value.totalGuests = []
+                            value.bookingPrice = []
+                            value.bookingid = []
+                            console.log("Property ID: ", value.uid)
+                            pool.query('SELECT * from `bookings` a JOIN `users` b ON a.bookedBy = b.email where propertyID = ? ', [value.uid], function (error,bookingResult) {
+                              if (!error){
+                                if (bookingResult.length > 0){
+                                  console.log("Inside query");
+                                  console.log("bookingResult: ", bookingResult)
+                                  Object.keys(bookingResult).map(function(j){
+                                    console.log("Value of value.uid is ", value.uid)
+                                    var tempbookedFrom = bookingResult[j].bookedFrom.getFullYear() + '-' + (bookingResult[j].bookedFrom.getMonth()+1) + '-' + bookingResult[j].bookedFrom.getDate()
+                                    value.fromDate.push(tempbookedFrom)
+                                    var tempbookedTo = bookingResult[j].bookedTo.getFullYear() + '-' + (bookingResult[j].bookedTo.getMonth()+1) + '-' + bookingResult[j].bookedTo.getDate()
+                                    value.toDate.push(tempbookedTo)
+                                    var tempbookedBy = bookingResult[j].firstname + ' ' + bookingResult[j].lastname
+                                    value.byTraveller.push(tempbookedBy)
+                                    value.totalGuests.push(bookingResult[j].NoOfGuests)
+                                    value.bookingPrice.push(bookingResult[j].price)
+                                    value.bookingid.push(bookingResult[j].bookingID)
+                                  })
+                                }
+                                inner_callback(null);
+                              } else {
+                                console.log("Error while performing Query");
+                                inner_callback(error);
+                              }
+                            });
+                          }, function (error) {
+                            if (error) {
+                              console.log(error);
+                            } else {
+                              console.log("Property Found");
+                              console.log(resultCopy);
+                              resolve ( resultCopy );
+                            }
+                          });
+                        }
+                      })
+                })
+            }
+        },
     }
 });
 

@@ -17,76 +17,76 @@ var upload = multer({ storage : storage })
 
 
 // Add Property
-router.route('/owner/listproperty').post(upload.array('uploadedPhoto',5), function (req, res) {
+// router.route('/owner/listproperty').post(upload.array('uploadedPhoto',5), function (req, res) {
 
-  console.log("req.files");
-  console.log(req.files);
+//   console.log("req.files");
+//   console.log(req.files);
 
-  let filenamearray =[];
-  req.files.forEach(file => {filenamearray.push(file.filename);});
-  console.log(filenamearray);
+//   let filenamearray =[];
+//   req.files.forEach(file => {filenamearray.push(file.filename);});
+//   console.log(filenamearray);
 
-  var stringObj = JSON.stringify(filenamearray);
-  console.log(stringObj);
-  console.log("In Owner Property Post");
+//   var stringObj = JSON.stringify(filenamearray);
+//   console.log(stringObj);
+//   console.log("In Owner Property Post");
 
-  var userData = {
-    listedBy: req.body.listedBy,
-    startDate: req.body.startDate,
-    endDate: req.body.endDate,
-    streetAddress: req.body.streetAddress,
-    city: req.body.city.toLowerCase(),
-    state: req.body.state.toLowerCase(),
-    country: req.body.country.toLowerCase(),
-    zipcode: req.body.zipcode,
-    headline: req.body.headline,
-    description: req.body.description,
-    propertyType: req.body.propertyType,
-    bedrooms: req.body.bedrooms,
-    sleeps: req.body.sleeps,
-    bathrooms: req.body.bathrooms,
-    baseRate: req.body.baseRate,
-    currency: req.body.currency,
-    minStay: req.body.minStay,
-    amenities: req.body.amenities,
-    image1:  (req.files.length >= 1) ?req.files[0].filename:"",
-    image2:  (req.files.length >= 2) ?req.files[1].filename:"",
-    image3:  (req.files.length >= 3) ?req.files[2].filename:"",
-    image4:  (req.files.length >= 4) ?req.files[3].filename:"",
-    image5:  (req.files.length >= 5) ?req.files[4].filename:"",
-  }
+//   var userData = {
+//     listedBy: req.body.listedBy,
+//     startDate: req.body.startDate,
+//     endDate: req.body.endDate,
+//     streetAddress: req.body.streetAddress,
+//     city: req.body.city.toLowerCase(),
+//     state: req.body.state.toLowerCase(),
+//     country: req.body.country.toLowerCase(),
+//     zipcode: req.body.zipcode,
+//     headline: req.body.headline,
+//     description: req.body.description,
+//     propertyType: req.body.propertyType,
+//     bedrooms: req.body.bedrooms,
+//     sleeps: req.body.sleeps,
+//     bathrooms: req.body.bathrooms,
+//     baseRate: req.body.baseRate,
+//     currency: req.body.currency,
+//     minStay: req.body.minStay,
+//     amenities: req.body.amenities,
+//     image1:  (req.files.length >= 1) ?req.files[0].filename:"",
+//     image2:  (req.files.length >= 2) ?req.files[1].filename:"",
+//     image3:  (req.files.length >= 3) ?req.files[2].filename:"",
+//     image4:  (req.files.length >= 4) ?req.files[3].filename:"",
+//     image5:  (req.files.length >= 5) ?req.files[4].filename:"",
+//   }
 
-  console.log(userData.image1);
-  pool.query('INSERT INTO property SET ?',userData, function (error,result) {
-    if (error) {
-      console.log(error);
-      console.log("unable to insert into database");
-      res.status(400).json({responseMessage: 'unable to insert into database'});
-    } else {
-      console.log(result);
-      console.log("Property Added");
-      res.status(200).json({responseMessage: 'Property Added'});
-    }
-  });    
-});
+//   console.log(userData.image1);
+//   pool.query('INSERT INTO property SET ?',userData, function (error,result) {
+//     if (error) {
+//       console.log(error);
+//       console.log("unable to insert into database");
+//       res.status(400).json({responseMessage: 'unable to insert into database'});
+//     } else {
+//       console.log(result);
+//       console.log("Property Added");
+//       res.status(200).json({responseMessage: 'Property Added'});
+//     }
+//   });    
+// });
 
 // Search Property
-router.route('/property/search').post(function (req, res) {
-  console.log(req.body);
+// router.route('/property/search').post(function (req, res) {
+//   console.log(req.body);
   
-  pool.query('SELECT * from `property` where (uid NOT IN (SELECT propertyID from `bookings` where ((? BETWEEN bookedFrom AND bookedTo) OR (? BETWEEN bookedFrom AND bookedTo)))) and city = ? and startDate <= ? and endDate >= ? and sleeps >= ?', [req.body.startDate, req.body.endDate, req.body.city.toLowerCase(), req.body.startDate, req.body.endDate, req.body.noOfGuests], function (error,result) {
-    if (error) {
-      console.log(error);
-      console.log("unable to search database");
-      res.status(400).json({responseMessage: 'unable to search database'});
-    } else {
-      console.log(JSON.stringify(result));
-      res.writeHead(200, {'content-type':'application/json'});
-      res.end(JSON.stringify(result));
-      console.log("Property Found");
-    }
-  });    
-});
+//   pool.query('SELECT * from `property` where (uid NOT IN (SELECT propertyID from `bookings` where ((? BETWEEN bookedFrom AND bookedTo) OR (? BETWEEN bookedFrom AND bookedTo)))) and city = ? and startDate <= ? and endDate >= ? and sleeps >= ?', [req.body.startDate, req.body.endDate, req.body.city.toLowerCase(), req.body.startDate, req.body.endDate, req.body.noOfGuests], function (error,result) {
+//     if (error) {
+//       console.log(error);
+//       console.log("unable to search database");
+//       res.status(400).json({responseMessage: 'unable to search database'});
+//     } else {
+//       console.log(JSON.stringify(result));
+//       res.writeHead(200, {'content-type':'application/json'});
+//       res.end(JSON.stringify(result));
+//       console.log("Property Found");
+//     }
+//   });    
+// });
 
 // Search Property by id
 router.route('/property/:id').get(function (req, res) {
@@ -106,21 +106,21 @@ router.route('/property/:id').get(function (req, res) {
 });
 
 // Search Booking by id
-router.route('/bookings/:id').get(function (req, res) {
-  console.log(req.params.id);
-  pool.query('SELECT * from `bookings` where bookingID = ? ', [req.params.id], function (error,result) {
-    if (error) {
-      console.log(error);
-      console.log("Booking not found");
-      res.status(400).json({responseMessage: 'Booking not found'});
-    } else {
-      console.log(JSON.stringify(result));
-      res.writeHead(200, {'content-type':'application/json'});
-      res.end(JSON.stringify(result));
-      console.log("Booking Details Found");
-    }
-  });    
-});
+// router.route('/bookings/:id').get(function (req, res) {
+//   console.log(req.params.id);
+//   pool.query('SELECT * from `bookings` where bookingID = ? ', [req.params.id], function (error,result) {
+//     if (error) {
+//       console.log(error);
+//       console.log("Booking not found");
+//       res.status(400).json({responseMessage: 'Booking not found'});
+//     } else {
+//       console.log(JSON.stringify(result));
+//       res.writeHead(200, {'content-type':'application/json'});
+//       res.end(JSON.stringify(result));
+//       console.log("Booking Details Found");
+//     }
+//   });    
+// });
 
 // List Property by owner
 router.route('/owner/propertylistings').post(function (req, res) {
@@ -209,20 +209,20 @@ router.route('/bookproperty').post(function (req, res) {
 });
 
 // List all trips by a traveller
-router.route('/traveller/triplistings').post(function (req, res) {
-  console.log(req.body.bookedBy);
-  pool.query('SELECT * from `bookings` a INNER JOIN `property` b ON a.propertyID = b.uid where a.bookedBy = ? ', [req.body.bookedBy], function (error,result) {
-    if (error) {
-      console.log(error);
-      console.log("Trips not found");
-      res.status(400).json({responseMessage: 'Trips not found'});
-    } else {
-      console.log(JSON.stringify(result));
-      res.writeHead(200, {'content-type':'application/json'});
-      res.end(JSON.stringify(result));
-      console.log("Trips Found");
-    }
-  });    
-});
+// router.route('/traveller/triplistings').post(function (req, res) {
+//   console.log(req.body.bookedBy);
+//   pool.query('SELECT * from `bookings` a INNER JOIN `property` b ON a.propertyID = b.uid where a.bookedBy = ? ', [req.body.bookedBy], function (error,result) {
+//     if (error) {
+//       console.log(error);
+//       console.log("Trips not found");
+//       res.status(400).json({responseMessage: 'Trips not found'});
+//     } else {
+//       console.log(JSON.stringify(result));
+//       res.writeHead(200, {'content-type':'application/json'});
+//       res.end(JSON.stringify(result));
+//       console.log("Trips Found");
+//     }
+//   });    
+// });
 
 module.exports = router;

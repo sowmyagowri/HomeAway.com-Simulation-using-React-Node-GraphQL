@@ -148,7 +148,7 @@ class Home extends Component {
               <img style={{marginTop: "13px"}} alt="US Flag" src={require('./us_flag.png')}/>
             </div>
             <button className="btn" id="white" style = {{fontColor : "#0067db", backgroundColor:"transparent", background:"transparent", borderColor:"transparent"}} type="button">Trip Boards</button>
-            {!isTravelerLoggedIn 
+            {!isTravelerLoggedIn
               ?
               (
                 <div className="btn btn-group" id="white" >

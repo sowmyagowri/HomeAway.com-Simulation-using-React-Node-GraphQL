@@ -153,11 +153,8 @@ class Profile extends Component{
     render(){
         //redirect based on successful login
         let redirectVar = null;
-        var email;
         if(!sessionStorage.getItem('cookie1')){
             redirectVar = <Redirect to= "/"/>
-        } else {
-            email = sessionStorage.getItem('cookie2');
         }
         
         return(
@@ -237,7 +234,7 @@ class Profile extends Component{
                 (
                     <Query 
                         query={profilefetchquery}
-                        variables={{ email }}
+                        variables={{ email: sessionStorage.getItem('cookie2') }}
                     >
                         { ({ loading, error, data }) => {
                             if (loading) return <div> Fetching Profile Data....</div>;
@@ -468,7 +465,7 @@ class Profile extends Component{
                         <div className="col-md-10 text-center"> 
                             <Mutation
                                 mutation={profilesavemutation}
-                                variables={{ email, firstname: this.state.firstname, lastname : this.state.lastname, aboutMe: this.state.aboutMe, city: this.state.city, state: this.state.state, country: this.state.country,
+                                variables={{ email: sessionStorage.getItem('cookie2'), firstname: this.state.firstname, lastname : this.state.lastname, aboutMe: this.state.aboutMe, city: this.state.city, state: this.state.state, country: this.state.country,
                                     company: this.state.company, school: this.state.school, hometown: this.state.hometown, languages: this.state.languages, gender: this.state.gender, phone: this.state.phone}}
                                 onCompleted= {data => {this.displayMessage(data)} }
                             >
