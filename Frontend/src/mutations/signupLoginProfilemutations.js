@@ -6,6 +6,7 @@ const travellerloginmutation = gql`
             cookie1
             cookie2
             cookie3
+            status
             message
         }
     }
@@ -17,6 +18,7 @@ const ownerloginmutation = gql`
             cookie1
             cookie2
             cookie3
+            status
             message
         }
     }
@@ -28,6 +30,7 @@ const travellersignupmutation = gql`
             cookie1
             cookie2
             cookie3
+            status
             message
         }
     }
@@ -39,6 +42,7 @@ const ownersignupmutation = gql`
             cookie1
             cookie2
             cookie3
+            status
             message
         }
     }

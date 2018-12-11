@@ -131,7 +131,7 @@ class Home extends Component {
 
   render(){
     let isTravelerLoggedIn = false;
-    if(sessionStorage.getItem('cookie1')){
+    if(sessionStorage.getItem('cookie1') === 'travellercookie' || sessionStorage.getItem('cookie1') === 'ownercookie'){
         isTravelerLoggedIn = true
     }
 

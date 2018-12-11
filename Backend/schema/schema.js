@@ -452,53 +452,53 @@ const Mutation = new GraphQLObjectType({
                     trimemail = email.trim();
                     var today = new Date();
                     var year = today.getFullYear();
-                    
+
                     pool.query('SELECT * FROM users WHERE email = ?', [trimemail], (err, rows) => {
+
                         if (err){
                             console.log(err);
                             console.log("unable to read the database");
                         } else if (rows.length > 0) {
-                            if (rows[0].isOwner == 'Y') {
-                                console.log("Traveller already exists");
-                                let cookies = {
-                                    cookie1: null,
-                                    cookie2: null,
-                                    cookie3: null,
-                                    status: 400,
-                                    message: "Traveller already exists"
-                                }
-                                resolve ( cookies )
-                            } else {
-                                crypt.createHash(args.password, function (response) {
-                                    encryptedPassword = response;
-                                
-                                    var userData = {
-                                        "firstname": args.firstname,
-                                        "lastname": args.lastname,
-                                        "email": trimemail,
-                                        "password": encryptedPassword,
-                                        "created": year,
-                                        "isOwner": 'N'
-                                    }
-                                
-                                    //Save the user in database
-                                    pool.query('INSERT INTO users SET ?', userData, function (err) {
-                                        if (err) {
-                                            console.log("unable to insert into database");
-                                        } else {
-                                            console.log("Traveller Added");
-                                            let cookies = {
-                                                cookie1: "travellercookie",
-                                                cookie2: trimemail,
-                                                cookie3: args.firstname,
-                                                status: 200,
-                                                message: "Traveller added"
-                                            }
-                                            resolve ( cookies )
-                                        }
-                                    });
-                                })
+                            console.log("Traveller already exists");
+                            let cookies = {
+                                cookie1: null,
+                                cookie2: null,
+                                cookie3: null,
+                                status: 400,
+                                message: "Traveller already exists"
                             }
+                            resolve ( cookies )
+                            } else {
+
+                            crypt.createHash(args.password, function (response) {
+                                encryptedPassword = response;
+                            
+                                var userData = {
+                                    "firstname": args.firstname,
+                                    "lastname": args.lastname,
+                                    "email": trimemail,
+                                    "password": encryptedPassword,
+                                    "created": year,
+                                    "isOwner": 'N'
+                                }
+                            
+                                //Save the user in database
+                                pool.query('INSERT INTO users SET ?', userData, function (err) {
+                                    if (err) {
+                                        console.log("unable to insert into database");
+                                    } else {
+                                        console.log("Traveller Added");
+                                        let cookies = {
+                                            cookie1: "travellercookie",
+                                            cookie2: trimemail,
+                                            cookie3: args.firstname,
+                                            status: 200,
+                                            message: "Traveller added"
+                                        }
+                                        resolve ( cookies )
+                                    }
+                                });
+                            })
                         }
                     })
                 })
@@ -567,7 +567,6 @@ const Mutation = new GraphQLObjectType({
                                 })
                                 }
                             } else {
-
                                 crypt.createHash(args.password, function (response) {
                                     encryptedPassword = response;
                                 
@@ -622,21 +621,19 @@ const Mutation = new GraphQLObjectType({
             },
             resolve(parent, args){
                 return new Promise( (resolve, reject ) => {
+                    console.log("args", args)
                     console.log("In Profile Save Mutation");
 
                     if(!args.firstname){
                         reject ("First Name cannot be empty");
-                    } else if(typeof args.firstname !== "undefined"){
-                        if(!args.firstname.match(/^[a-zA-Z ]+$/)){
-                            reject ("First Name cannot contain numbers");
-                        }        
+                    } else if(!args.firstname.match(/^[a-zA-Z ]+$/)){
+                        reject ("First Name cannot contain numbers");       
                     } else if (!args.lastname){
-                            reject("Last Name cannot be empty");
-                    } else if(typeof args.lastname !== "undefined"){
-                            if(!args.lastname.match(/^[a-zA-Z ]+$/)){
-                                reject ("Last Name cannot contain numbers");
-                            }        
+                        reject("Last Name cannot be empty");
+                    } else if(!args.lastname.match(/^[a-zA-Z ]+$/)){
+                        reject ("Last Name cannot contain numbers");      
                     } else {
+                        
                         email = args.email.toLowerCase();
                         trimemail = email.trim();
                         

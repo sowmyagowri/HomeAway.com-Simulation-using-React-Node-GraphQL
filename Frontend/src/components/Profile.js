@@ -105,7 +105,9 @@ class Profile extends Component{
         })
     }
 
-    displayMessage = async (data) => {
+    displayMessage = (data) => {
+        console.log("here", data)
+
         const { status, message } = data.profilesave
         if (status === 200) {
             this.setState({

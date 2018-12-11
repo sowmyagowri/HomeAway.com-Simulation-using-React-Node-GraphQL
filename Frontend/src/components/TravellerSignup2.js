@@ -5,7 +5,6 @@ import './bootstrap-social.css';
 import {Navbar} from "react-bootstrap";
 import validator from 'validator';
 
-
 import { Mutation } from 'react-apollo'
 import { travellersignupmutation } from '../mutations/signupLoginProfilemutations';
 
@@ -129,20 +128,21 @@ class TravellerSignup2 extends Component{
                     <SweetAlert 
                         success 
                         title = "Success!!"
-                        onConfirm={() => window.location = "/owner/propertypost"}
+                        onConfirm={() => window.location = "/"}
                     >
-                        Owner profile created!
+                        Traveller profile created!
                     </SweetAlert>
                 );
                     
                 this.setState({
                     alert: getAlert(),
                 });
+            } else {
+                this.setState({
+                    submitted: true,
+                    message:  message
+                });
             }
-            this.setState({
-                submitted: true,
-                message:  message
-            });
         }
     }
 

@@ -7,13 +7,13 @@
     
 ## Technologies : 
 
-  ### Front end 
+  ### Front-end 
     - ReactJS
     - HTML5
     - React BootStrap
     - Apollo Client (GraphQL Client for JS)
 
-  ### Back end 
+  ### Back-end 
     - NodeJS
     - GraphQL
 

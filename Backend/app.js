@@ -11,7 +11,6 @@ var pool = require('./src/models/UserDB.js');
 //server configuration
 var port = 3001;
 
-
 //use cors to allow cross origin resource sharing
 var cors = require('cors');
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
