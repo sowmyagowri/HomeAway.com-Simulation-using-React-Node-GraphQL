@@ -1,4 +1,5 @@
-# HomeAway-Lab3-CMPE-273
+# HomeAway.com Simulation
+This was developed as a part of Lab 3 for CMPE 273 coursework at SJSU solely for educational purposes.
 
 ## How can I run HomeAway?
   - Run HomeAway back-end using instructions in ReadMe.md in backend directory
