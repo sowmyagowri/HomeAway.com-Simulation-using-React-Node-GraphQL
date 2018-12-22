@@ -20,5 +20,7 @@ This was developed as a part of Lab 3 for CMPE 273 coursework at SJSU solely for
 
   ### Data Storage
     - MySQL
+    
+## HomePage
 
 ![pic](https://user-images.githubusercontent.com/25673997/50368694-7e81ea80-0540-11e9-9869-cb1163d9d4fe.jpg)
